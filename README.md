@@ -124,6 +124,26 @@ var COMMUNITY_API = '/api/posts';
 
 ### 4단계 — 올리기
 
+⚠ **깃허브에 올릴 때는 「폴더 안의 내용」을 올려야 합니다.**
+압축을 풀면 `b-beauty` 폴더가 생기는데, **그 폴더째로 올리면 안 됩니다.**
+저장소 맨 위에 `index.html` · `api` · `vercel.json` 이 바로 보여야 합니다.
+
+```
+내저장소/
+├── index.html      ← 이 자리에 있어야 한다
+├── api/
+│   └── posts.js
+├── vercel.json
+└── src/
+```
+
+⚠ **`vercel.json` 에 `functions` 설정을 넣지 마세요.**
+`"functions": { "api/posts.js": ... }` 를 넣으면, 경로가 조금만 어긋나도
+**「doesn't match any Serverless Functions」 오류로 빌드가 실패**합니다.
+Vercel 은 `api/` 폴더를 자동으로 알아보므로 이 설정이 필요 없습니다.
+(2026-09-01 에 이 문제로 배포가 실패해 설정을 뺐습니다.)
+
+
 `index.html` 과 함께 **`api/posts.js` 와 `vercel.json` 도 같이** 올립니다.
 Vercel 이 `api/` 폴더를 알아서 서버 기능으로 인식합니다.
 
