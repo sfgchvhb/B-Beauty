@@ -2208,33 +2208,37 @@ footer .rt [data-adminlogin].on{color:var(--brand);font-weight:700}
   /* 꾸미기 도구는 가로로 미는 곳 — 막대를 아예 감춘다 */
   .rtbar::-webkit-scrollbar{width:0;height:0}
 
-  /* ── ② 메뉴바 — 뒤가 비치되 글자는 읽히도록 ──────────────
-     ⚠ 흰색으로 꽉 채우면 「흰 막대」가 되어 배경 사진이 가려진다.
-        **뒤를 흐리게(blur) 하는 것만으로도 글자가 또렷해진다.**
-        흰 기는 살짝만 올려 은은함을 지킨다. */
-  /* ⚠ 흰 기는 **최소로**. 가독성은 흐림(blur)과 글자 그림자가 만든다.
-     흐림을 세게 걸면 뒤 무늬가 뭉개져, 흰 기가 거의 없어도 글자가 읽힌다. */
+  /* ── ② 메뉴바 — **데스크톱 드롭다운과 같은 밝기** ──────────
+     기준: `.dropdown` = 흰색 55% + 흐림 26px + 채도 1.6
+     (흐림을 못 쓰는 환경에서는 90%)
+     ⚠ 이 값을 바꿀 때는 데스크톱 드롭다운도 함께 맞춰야 결이 유지된다. */
   .nav::before{
     background:linear-gradient(180deg,
-      rgba(255,255,255,.40) 0,
-      rgba(255,255,255,.27) 62%,
-      rgba(255,255,255,.05) 100%) !important;
-    -webkit-backdrop-filter:blur(22px) saturate(1.2) brightness(1.06);
-    backdrop-filter:blur(22px) saturate(1.2) brightness(1.06)}
+      rgba(255,255,255,.55) 0,
+      rgba(255,255,255,.40) 62%,
+      rgba(255,255,255,.14) 100%) !important;
+    -webkit-backdrop-filter:blur(26px) saturate(1.6);
+    backdrop-filter:blur(26px) saturate(1.6)}
   .nav.scrolled::before{
-    background:rgba(255,255,255,.52) !important;
-    -webkit-backdrop-filter:blur(24px) saturate(1.2) brightness(1.05);
-    backdrop-filter:blur(24px) saturate(1.2) brightness(1.05)}
+    background:rgba(255,255,255,.55) !important;
+    -webkit-backdrop-filter:blur(26px) saturate(1.6);
+    backdrop-filter:blur(26px) saturate(1.6)}
 
-  /* 메뉴를 펼쳤을 때만 조금 더 — 항목 뒤로 본문이 비치면 읽기 어렵다 */
-  /* ⚠ 메뉴를 펼쳤을 때는 **뒤가 비치면 안 된다.**
-        항목 뒤로 본문이 겹쳐 보이면 읽기 어렵고 「뚫린」 느낌이 난다.
-        (닫혀 있을 때의 투명함과는 별개로 다뤄야 한다) */
+  /* 메뉴를 열면 — 위아래 같은 농도로 화면 아래까지 채운다 */
   .nav.menuopen::before{
-    background:rgba(255,255,255,.985) !important;
-    -webkit-backdrop-filter:blur(30px);backdrop-filter:blur(30px)}
-  /* 메뉴 아래 끝까지 배경이 이어지도록 여백을 넉넉히 */
-  .nav.menuopen .mobilemenu{padding-bottom:22px}
+    background:rgba(255,255,255,.55) !important;
+    -webkit-backdrop-filter:blur(26px) saturate(1.6);
+    backdrop-filter:blur(26px) saturate(1.6)}
+  /* 흐림을 못 쓰는 환경에서는 드롭다운과 같이 90% 로 */
+  @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+    .nav::before,.nav.scrolled::before,.nav.menuopen::before{
+      background:rgba(255,255,255,.90) !important}
+  }
+  /* ⚠ `.nav-in` 은 가로 배치(flex-wrap)라, nav 에만 높이를 줘도 안쪽이 늘어나지 않는다.
+        안쪽도 함께 늘어나야 메뉴가 화면 아래까지 이어진다. */
+  .nav.menuopen{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
+  .nav.menuopen .nav-in{flex:1;align-content:flex-start}
+  .nav.menuopen .mobilemenu{max-height:none;overflow-y:auto;flex:1 1 auto}
 
   /* 흰 기가 옅어진 만큼 글자에 옅은 흰 테를 둘러 어느 배경에서도 읽히게 한다 */
   .nav .logo .l1,.nav .logo .l2,.nav .langs button,.nav .burger,.nav .mm{
