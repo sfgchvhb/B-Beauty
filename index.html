@@ -2187,29 +2187,24 @@ footer .rt [data-adminlogin].on{color:var(--brand);font-weight:700}
   .scrolling .legalbody::-webkit-scrollbar-thumb{
     background:rgba(0,75,92,.28);border-radius:999px}
 
-  /* ── ② 메뉴바 — 뒤 배경이 비쳐 글자가 안 보이던 것을 고친다 ──
-     ⚠ 기존은 위 86% → 아래 0% 라, 바다 배경 위에서 로고와 메뉴가 묻혔다.
-        흰 기를 올리고 뒤를 흐리게 해 글자가 또렷하게 읽히도록 한다. */
+  /* ── ② 메뉴바 — 뒤가 비치되 글자는 읽히도록 ──────────────
+     ⚠ 흰색으로 꽉 채우면 「흰 막대」가 되어 배경 사진이 가려진다.
+        **뒤를 흐리게(blur) 하는 것만으로도 글자가 또렷해진다.**
+        흰 기는 살짝만 올려 은은함을 지킨다. */
   .nav::before{
     background:linear-gradient(180deg,
-      rgba(255,255,255,.96) 0,
-      rgba(255,255,255,.92) 58%,
-      rgba(255,255,255,.72) 100%) !important;
-    -webkit-backdrop-filter:blur(10px);
-    backdrop-filter:blur(10px)}
+      rgba(255,255,255,.72) 0,
+      rgba(255,255,255,.52) 62%,
+      rgba(255,255,255,.18) 100%) !important;
+    -webkit-backdrop-filter:blur(12px) saturate(1.1);
+    backdrop-filter:blur(12px) saturate(1.1)}
   .nav.scrolled::before{
-    background:rgba(255,255,255,.97) !important}
+    background:rgba(255,255,255,.92) !important}
 
-  /* 메뉴가 열려 있을 때는 완전히 불투명하게 — 뒤 내용이 비치면 읽기 어렵다 */
+  /* 메뉴를 펼쳤을 때만 불투명하게 — 항목 뒤로 본문이 비치면 읽기 어렵다 */
   .nav.menuopen::before{
-    background:#fff !important;
-    -webkit-backdrop-filter:none;backdrop-filter:none}
-
-  /* 배경이 밝아졌으므로 글자도 진하게 */
-  .nav .logo .l1{color:var(--brand-dark);-webkit-text-stroke:0;text-shadow:none}
-  .nav .logo .l2{color:var(--brand)}
-  .nav .langs button{color:var(--brand-mid)}
-  .nav .burger{color:var(--brand-dark)}
+    background:rgba(255,255,255,.97) !important;
+    -webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
 }
 
 </style>
