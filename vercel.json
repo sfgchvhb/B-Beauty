@@ -1,0 +1,6 @@
+{
+  "cleanUrls": true,
+  "functions": {
+    "api/posts.js": { "maxDuration": 10 }
+  }
+}

@@ -52,6 +52,8 @@ posts_tr = load('posts_tr.json')
 notices = load('notices.json')
 notices_tr = load('notices_tr.json')
 tc = load('community_text.json')
+badwords = load('badwords.json')      # 커뮤니티 금지 표현
+legal = load('legal.json')            # 이용약관·개인정보처리방침
 meta = load('meta.json')
 videos = load('videos.json')
 
@@ -84,13 +86,32 @@ else:
     print('  (src/fonts/quentin.woff2 없음 — 로고 글꼴은 건너뜁니다)')
 app = open(os.path.join(SRC, 'app.js'), encoding='utf-8').read()
 
+# ── 구글 애널리틱스 4 ──────────────────────────────────
+# ⚠ 측정 ID(G-XXXXXXX)를 넣으면 방문 통계 수집이 켜진다.
+#    비워 두면 아무 코드도 들어가지 않는다.
+#    ID 는 구글 애널리틱스 → 관리 → 데이터 스트림에서 확인한다.
+GA4_ID = ''
+
+ga_tag = ''
+if GA4_ID:
+    ga_tag = f"""<script async src="https://www.googletagmanager.com/gtag/js?id={GA4_ID}"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){{dataLayer.push(arguments);}}
+gtag('js', new Date());
+/* IP 를 익명 처리해 수집한다 (개인정보처리방침에 밝힌 내용) */
+gtag('config', '{GA4_ID}', {{ anonymize_ip: true }});
+</script>"""
+    print('구글 애널리틱스 4 포함 (%s)' % GA4_ID)
+
 html = f'''<!doctype html>
 <html lang="ko">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>B-BEAUTY | 부산 코스메틱 연합 플랫폼</title>
-<meta name="description" content="부산을 대표하는 화장품 브랜드가 모인 연합 플랫폼. 아마란스, 크레이지앤트, 엘다라, 더블리, 유엔비의 제품을 한곳에서 만나보세요.">
+<title>B-BEAUTY | K-뷰티 연합 플랫폼</title>
+{ga_tag}
+<meta name="description" content="K-뷰티 브랜드 연합 플랫폼 B-Wave. 시에스킨·숲의 사랑·엘다라·슌유·힐마르의 제품을 한자리에서 비교하고 공식몰에서 바로 구매하세요.">
 <style>
 {css}
 </style>
@@ -105,6 +126,8 @@ window.POSTS_TR     = {j(posts_tr)};
 window.NOTICES      = {j(notices)};
 window.NOTICES_TR   = {j(notices_tr)};
 window.TC           = {j(tc)};
+window.BADWORDS     = {j(badwords)};
+window.LEGAL        = {j(legal)};
 window.VIDEOS       = {j(videos)};
 window.IMG          = {j(IMG)};
 </script>
@@ -119,17 +142,22 @@ with open(OUT, 'w', encoding='utf-8') as f:
     f.write(html)
 print('빌드 완료: %s (%.2f MB)' % (OUT, os.path.getsize(OUT) / 1024 / 1024))
 
-# 영어·중국어에 한글이 남아 있는지 확인한다 (한국어만 고치는 실수를 잡는다)
-try:
-    import subprocess
-    _chk = os.path.join(os.path.dirname(os.path.abspath(__file__)), '다국어-점검.py')
-    if os.path.exists(_chk):
-        _r = subprocess.run([sys.executable, _chk], capture_output=True, text=True)
-        if _r.returncode != 0:
-            print('\n⚠ 다국어 누락이 있습니다 —')
-            print(_r.stdout.rstrip())
-except Exception as _e:
-    print('  (다국어 점검을 건너뜀: %s)' % _e)
+# 빌드할 때마다 자동으로 점검한다.
+#   · 다국어  — 영어·중국어에 한글이 남아 있는지 (한국어만 고치는 실수)
+#   · 링크    — 외부 링크가 페이지를 두 개씩 여는지
+_CHECKS = [('다국어-점검.py', '다국어 누락이 있습니다'),
+           ('링크-점검.py', '링크에 문제가 있습니다')]
+for _name, _msg in _CHECKS:
+    try:
+        import subprocess
+        _chk = os.path.join(os.path.dirname(os.path.abspath(__file__)), _name)
+        if os.path.exists(_chk):
+            _r = subprocess.run([sys.executable, _chk], capture_output=True, text=True)
+            if _r.returncode != 0:
+                print('\n⚠ %s —' % _msg)
+                print(_r.stdout.rstrip())
+    except Exception as _e:
+        print('  (%s 을 건너뜀: %s)' % (_name, _e))
 
 
 # ── 미리보기용 경량본 ──────────────────────────────────
@@ -138,7 +166,8 @@ except Exception as _e:
 PREVIEW_MAX = 460      # 사진 긴 변 최대 픽셀
 PREVIEW_Q = 54         # JPEG 품질
 # 화면을 꽉 채우는 배경 사진은 460px 로 줄이면 심하게 뭉개진다 — 따로 더 크게 유지한다
-PREVIEW_BIG = {'ocean_cosmetics_hero_1784622126081.jpg': (1100, 74)}
+# 히어로 배경은 미리보기에서도 화질을 유지한다 (제품 글자가 뭉개지지 않도록)
+PREVIEW_BIG = {'ocean_cosmetics_hero_1784622126081.jpg': (1376, 88)}
 
 
 def build_preview():
