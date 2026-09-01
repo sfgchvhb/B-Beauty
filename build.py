@@ -94,15 +94,29 @@ GA4_ID = ''
 
 ga_tag = ''
 if GA4_ID:
-    ga_tag = f"""<script async src="https://www.googletagmanager.com/gtag/js?id={GA4_ID}"></script>
-<script>
+    # ⚠ 스크립트를 바로 불러오지 않는다. 동의를 받은 뒤 `window.BB_loadGA()` 로 부른다.
+    #    (유럽은 쿠키를 심기 **전에** 동의를 받아야 한다)
+    ga_tag = f"""<script>
+window.BB_GA_ID = '{GA4_ID}';
 window.dataLayer = window.dataLayer || [];
 function gtag(){{dataLayer.push(arguments);}}
-gtag('js', new Date());
-/* IP 를 익명 처리해 수집한다 (개인정보처리방침에 밝힌 내용) */
-gtag('config', '{GA4_ID}', {{ anonymize_ip: true }});
+window.BB_loadGA = function () {{
+  if (window.__gaLoaded) return;
+  window.__gaLoaded = true;
+  var s = document.createElement('script');
+  s.async = true;
+  s.src = 'https://www.googletagmanager.com/gtag/js?id={GA4_ID}';
+  document.head.appendChild(s);
+  gtag('js', new Date());
+  /* IP 를 익명 처리해 수집한다 (개인정보처리방침에 밝힌 내용) */
+  gtag('config', '{GA4_ID}', {{ anonymize_ip: true }});
+}};
+/* 이미 동의한 방문자는 바로 시작한다 */
+try {{
+  if (localStorage.getItem('bbeauty_cookie_consent') === 'yes') window.BB_loadGA();
+}} catch (e) {{}}
 </script>"""
-    print('구글 애널리틱스 4 포함 (%s)' % GA4_ID)
+    print('구글 애널리틱스 4 포함 (%s) — 동의 후 실행' % GA4_ID)
 
 html = f'''<!doctype html>
 <html lang="ko">
