@@ -402,6 +402,14 @@ h1,h2,h3,h4,h5{margin:0}
   background:none;border:0;border-bottom:1px solid transparent;color:var(--brand);font-size:12px;font-weight:600;
   transition:.25s}
 .orgbox a.mall:hover{color:var(--brand-dark);border-bottom-color:var(--brand-dark)}
+/* ⚠ 좁은 화면에서는 두 링크가 한 줄에 안 들어가 줄이 바뀌는데,
+      그때 왼쪽 여백(14px) 때문에 두 번째 링크가 오른쪽으로 밀린다.
+      **500px 아래에서만** 세로로 쌓아 왼쪽을 맞춘다 (2026-09-01).
+      (나란히 놓으려면 약 403px 필요 — 그 위에서는 원래대로 한 줄) */
+@media (max-width:500px){
+  .orgbox a.mall{display:flex;width:fit-content}
+  .orgbox .mall + .mall{margin-left:0;margin-top:6px}
+}
 
 .sub{padding-top:32px;margin-top:32px;border-top:1px solid var(--line)}
 .sub-h{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;
@@ -1319,6 +1327,15 @@ button.allrow:hover{background:rgba(255,255,255,.5)}
 
 /* 브랜드 링크 — 공식몰 · 스마트스토어를 나란히 */
 .mall + .mall{margin-left:14px}
+/* 기업정보 안에서는 세로로 쌓이므로 왼쪽 여백 대신 위 여백을 쓴다 (2026-09-01) */
+/* ⚠ 좁은 화면에서는 두 링크가 한 줄에 안 들어가 줄이 바뀌는데,
+      그때 왼쪽 여백(14px) 때문에 두 번째 링크가 오른쪽으로 밀린다.
+      **500px 아래에서만** 세로로 쌓아 왼쪽을 맞춘다 (2026-09-01).
+      (나란히 놓으려면 약 403px 필요 — 그 위에서는 원래대로 한 줄) */
+@media (max-width:500px){
+  .orgbox a.mall{display:flex;width:fit-content}
+  .orgbox .mall + .mall{margin-left:0;margin-top:6px}
+}
 .dossier-mall{display:inline-block;color:var(--brand);text-decoration:underline;text-underline-offset:3px}
 .dossier-mall + .dossier-mall{margin-left:14px}
 .chip.round.brandy + .chip.round.brandy{margin-left:0}
