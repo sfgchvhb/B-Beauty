@@ -2139,6 +2139,28 @@ footer .fslogan{font-weight:400}
 /* 푸터 관리자 버튼 (2026-09-01) */
 footer .rt [data-adminlogin].on{color:var(--brand);font-weight:700}
 
+/* 모바일 메뉴 스크롤 (2026-09-01)
+   ⚠ 메뉴를 열면 배경 스크롤을 잠그는데, 메뉴 자체에 스크롤이 없어
+      내용이 화면보다 길면 **아래를 볼 수 없었다.**
+      (브랜드 하위 목록까지 펼치면 약 848px 로 화면을 넘는다) */
+@media (max-width:940px){
+  .mobilemenu{
+    max-height:calc(100vh - 120px);
+    max-height:calc(100dvh - 120px);   /* 주소창 높이를 뺀 실제 화면 (최신 브라우저) */
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;  /* 아이폰에서 손가락 스크롤이 부드럽게 */
+    overscroll-behavior:contain;       /* 끝까지 내려도 뒤 화면이 따라 움직이지 않게 */
+    padding-bottom:16px;
+  }
+  /* 스크롤 막대는 가늘게 */
+  .mobilemenu::-webkit-scrollbar{width:3px}
+  .mobilemenu::-webkit-scrollbar-thumb{background:rgba(0,75,92,.2);border-radius:3px}
+  /* 아래에 더 있다는 것을 알리는 옅은 그림자 */
+  .mobilemenu{
+    -webkit-mask-image:linear-gradient(180deg,#000 0,#000 calc(100% - 20px),transparent);
+    mask-image:linear-gradient(180deg,#000 0,#000 calc(100% - 20px),transparent)}
+}
+
 </style>
 </head>
 <body>
