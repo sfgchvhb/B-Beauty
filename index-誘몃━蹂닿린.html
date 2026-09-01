@@ -2198,23 +2198,29 @@ footer .rt [data-adminlogin].on{color:var(--brand);font-weight:700}
      ⚠ 흰색으로 꽉 채우면 「흰 막대」가 되어 배경 사진이 가려진다.
         **뒤를 흐리게(blur) 하는 것만으로도 글자가 또렷해진다.**
         흰 기는 살짝만 올려 은은함을 지킨다. */
-  /* ⚠ 흰 기는 **아주 옅게만**. 가독성은 흐림(blur)이 만든다. */
+  /* ⚠ 흰 기는 **최소로**. 가독성은 흐림(blur)과 글자 그림자가 만든다.
+     흐림을 세게 걸면 뒤 무늬가 뭉개져, 흰 기가 거의 없어도 글자가 읽힌다. */
   .nav::before{
     background:linear-gradient(180deg,
-      rgba(255,255,255,.42) 0,
-      rgba(255,255,255,.26) 62%,
-      rgba(255,255,255,.06) 100%) !important;
-    -webkit-backdrop-filter:blur(16px) saturate(1.15);
-    backdrop-filter:blur(16px) saturate(1.15)}
+      rgba(255,255,255,.40) 0,
+      rgba(255,255,255,.27) 62%,
+      rgba(255,255,255,.05) 100%) !important;
+    -webkit-backdrop-filter:blur(22px) saturate(1.2) brightness(1.06);
+    backdrop-filter:blur(22px) saturate(1.2) brightness(1.06)}
   .nav.scrolled::before{
-    background:rgba(255,255,255,.66) !important;
-    -webkit-backdrop-filter:blur(18px) saturate(1.15);
-    backdrop-filter:blur(18px) saturate(1.15)}
+    background:rgba(255,255,255,.52) !important;
+    -webkit-backdrop-filter:blur(24px) saturate(1.2) brightness(1.05);
+    backdrop-filter:blur(24px) saturate(1.2) brightness(1.05)}
 
   /* 메뉴를 펼쳤을 때만 조금 더 — 항목 뒤로 본문이 비치면 읽기 어렵다 */
   .nav.menuopen::before{
-    background:rgba(255,255,255,.82) !important;
-    -webkit-backdrop-filter:blur(22px);backdrop-filter:blur(22px)}
+    background:rgba(255,255,255,.62) !important;
+    -webkit-backdrop-filter:blur(28px) brightness(1.04);
+    backdrop-filter:blur(28px) brightness(1.04)}
+
+  /* 흰 기가 옅어진 만큼 글자에 옅은 흰 테를 둘러 어느 배경에서도 읽히게 한다 */
+  .nav .logo .l1,.nav .logo .l2,.nav .langs button,.nav .burger,.nav .mm{
+    text-shadow:0 1px 3px rgba(255,255,255,.85), 0 0 10px rgba(255,255,255,.6)}
 }
 
 </style>
