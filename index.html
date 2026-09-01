@@ -2153,12 +2153,8 @@ footer .rt [data-adminlogin].on{color:var(--brand);font-weight:700}
     padding-bottom:16px;
   }
   /* 스크롤 막대는 가늘게 */
-  .mobilemenu::-webkit-scrollbar{width:3px}
-  .mobilemenu::-webkit-scrollbar-thumb{background:rgba(0,75,92,.2);border-radius:3px}
-  /* 아래에 더 있다는 것을 알리는 옅은 그림자 */
-  .mobilemenu{
-    -webkit-mask-image:linear-gradient(180deg,#000 0,#000 calc(100% - 20px),transparent);
-    mask-image:linear-gradient(180deg,#000 0,#000 calc(100% - 20px),transparent)}
+  /* ⚠ 아래쪽을 흐리게(mask) 하면 **뚫린 것처럼** 보인다.
+        스크롤바가 이미 「더 있다」를 알려 주므로 쓰지 않는다. */
 }
 
 /* =========================================================
@@ -2166,33 +2162,51 @@ footer .rt [data-adminlogin].on{color:var(--brand);font-weight:700}
    ========================================================= */
 @media (max-width:940px){
 
-  /* ── ① 스크롤바는 손가락을 움직일 때만 보인다 ──────────
-     ⚠ 휴대폰에서는 스크롤바가 늘 떠 있으면 화면을 가린다.
-        `.scrolling` 은 화면을 움직이는 동안에만 붙는다 (app.js). */
-  .mobilemenu,.sdrop,.rtbar,.legalbody{
-    scrollbar-width:none;                 /* 파이어폭스 */
-    -ms-overflow-style:none}
-  .mobilemenu::-webkit-scrollbar,
-  .sdrop::-webkit-scrollbar,
-  .rtbar::-webkit-scrollbar,
-  .legalbody::-webkit-scrollbar{width:0;height:0}
+  /* ── ① 스크롤바 — 오른쪽 벽에 붙이고, 움직일 때만 부드럽게 ──
+     ⚠ 예전에는 폭이 6~10px 이라 오른쪽에 떠 보였고 글자를 가렸다.
+        → **3px 로 얇게, 여백 없이 벽에 붙인다.**
+     ⚠ 폭을 0 ↔ n 으로 바꾸면 뚝 끊긴다.
+        → 폭은 늘 3px 로 두고 **색만 옅어졌다 짙어지게** 한다 (0.14초). */
+  .mobilemenu,.sdrop,.rtbar,.legalbody,.sheet-body{
+    scrollbar-width:thin;
+    scrollbar-color:transparent transparent;
+    scrollbar-gutter:auto;
+    transition:scrollbar-color .14s ease}
+  .scrolling .mobilemenu,.scrolling .sdrop,
+  .scrolling .legalbody,.scrolling .sheet-body{
+    scrollbar-color:rgba(0,75,92,.34) transparent}
 
-  /* 움직이는 동안만 보여 준다.
-     ⚠ 폭을 0 ↔ 4px 로 바꾸면 뚝 끊긴다.
-        → **폭은 늘 4px 로 두고 색만 옅어지게** 해야 부드럽다. */
-  .mobilemenu,.sdrop,.legalbody{scrollbar-width:thin}
+  /* 크롬·사파리 */
   .mobilemenu::-webkit-scrollbar,
   .sdrop::-webkit-scrollbar,
-  .legalbody::-webkit-scrollbar{width:4px;height:4px}
+  .legalbody::-webkit-scrollbar,
+  .sheet-body::-webkit-scrollbar{width:3px;height:3px}
+  .mobilemenu::-webkit-scrollbar-track,
+  .sdrop::-webkit-scrollbar-track,
+  .legalbody::-webkit-scrollbar-track,
+  .sheet-body::-webkit-scrollbar-track{background:transparent;margin:0}
   .mobilemenu::-webkit-scrollbar-thumb,
   .sdrop::-webkit-scrollbar-thumb,
-  .legalbody::-webkit-scrollbar-thumb{
-    background:rgba(0,75,92,0);border-radius:999px;
-    transition:background .18s ease}
+  .legalbody::-webkit-scrollbar-thumb,
+  .sheet-body::-webkit-scrollbar-thumb{
+    background:rgba(0,75,92,0);border-radius:999px;border:0;
+    transition:background .14s ease}
   .scrolling .mobilemenu::-webkit-scrollbar-thumb,
   .scrolling .sdrop::-webkit-scrollbar-thumb,
-  .scrolling .legalbody::-webkit-scrollbar-thumb{
-    background:rgba(0,75,92,.32)}
+  .scrolling .legalbody::-webkit-scrollbar-thumb,
+  .scrolling .sheet-body::-webkit-scrollbar-thumb{
+    background:rgba(0,75,92,.34)}
+
+  /* 화면 전체 스크롤바도 같은 방식으로 */
+  html::-webkit-scrollbar,body::-webkit-scrollbar{width:3px}
+  html::-webkit-scrollbar-track,body::-webkit-scrollbar-track{background:transparent}
+  html::-webkit-scrollbar-thumb,body::-webkit-scrollbar-thumb{
+    background:rgba(0,75,92,0);border-radius:999px;transition:background .14s ease}
+  html.scrolling::-webkit-scrollbar-thumb,
+  html.scrolling body::-webkit-scrollbar-thumb{background:rgba(0,75,92,.34)}
+
+  /* 꾸미기 도구는 가로로 미는 곳 — 막대를 아예 감춘다 */
+  .rtbar::-webkit-scrollbar{width:0;height:0}
 
   /* ── ② 메뉴바 — 뒤가 비치되 글자는 읽히도록 ──────────────
      ⚠ 흰색으로 꽉 채우면 「흰 막대」가 되어 배경 사진이 가려진다.
@@ -2213,10 +2227,14 @@ footer .rt [data-adminlogin].on{color:var(--brand);font-weight:700}
     backdrop-filter:blur(24px) saturate(1.2) brightness(1.05)}
 
   /* 메뉴를 펼쳤을 때만 조금 더 — 항목 뒤로 본문이 비치면 읽기 어렵다 */
+  /* ⚠ 메뉴를 펼쳤을 때는 **뒤가 비치면 안 된다.**
+        항목 뒤로 본문이 겹쳐 보이면 읽기 어렵고 「뚫린」 느낌이 난다.
+        (닫혀 있을 때의 투명함과는 별개로 다뤄야 한다) */
   .nav.menuopen::before{
-    background:rgba(255,255,255,.62) !important;
-    -webkit-backdrop-filter:blur(28px) brightness(1.04);
-    backdrop-filter:blur(28px) brightness(1.04)}
+    background:rgba(255,255,255,.985) !important;
+    -webkit-backdrop-filter:blur(30px);backdrop-filter:blur(30px)}
+  /* 메뉴 아래 끝까지 배경이 이어지도록 여백을 넉넉히 */
+  .nav.menuopen .mobilemenu{padding-bottom:22px}
 
   /* 흰 기가 옅어진 만큼 글자에 옅은 흰 테를 둘러 어느 배경에서도 읽히게 한다 */
   .nav .logo .l1,.nav .logo .l2,.nav .langs button,.nav .burger,.nav .mm{
@@ -4692,7 +4710,7 @@ window.IMG          = {"/src/assets/images/ama_healmar_cleanser.jpg":"data:image
     if (scrollTimer) clearTimeout(scrollTimer);
     scrollTimer = setTimeout(function () {
       document.documentElement.classList.remove('scrolling');
-    }, 550);          /* 멎고 0.55초 뒤 감춘다 (예전 1초) */
+    }, 350);          /* 멎고 0.35초 뒤 감춘다 — 빠릿하게 */
   }
   ['scroll', 'touchmove', 'wheel'].forEach(function (ev) {
     window.addEventListener(ev, markScrolling, { passive: true, capture: true });
