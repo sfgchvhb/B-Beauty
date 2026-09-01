@@ -2161,6 +2161,57 @@ footer .rt [data-adminlogin].on{color:var(--brand);font-weight:700}
     mask-image:linear-gradient(180deg,#000 0,#000 calc(100% - 20px),transparent)}
 }
 
+/* =========================================================
+   모바일 — 스크롤바 자동 숨김 · 메뉴바 가독성 (2026-09-01)
+   ========================================================= */
+@media (max-width:940px){
+
+  /* ── ① 스크롤바는 손가락을 움직일 때만 보인다 ──────────
+     ⚠ 휴대폰에서는 스크롤바가 늘 떠 있으면 화면을 가린다.
+        `.scrolling` 은 화면을 움직이는 동안에만 붙는다 (app.js). */
+  .mobilemenu,.sdrop,.rtbar,.legalbody{
+    scrollbar-width:none;                 /* 파이어폭스 */
+    -ms-overflow-style:none}
+  .mobilemenu::-webkit-scrollbar,
+  .sdrop::-webkit-scrollbar,
+  .rtbar::-webkit-scrollbar,
+  .legalbody::-webkit-scrollbar{width:0;height:0}
+
+  /* 움직이는 동안만 가늘게 보여 준다 */
+  .scrolling .mobilemenu,.scrolling .sdrop,.scrolling .legalbody{scrollbar-width:thin}
+  .scrolling .mobilemenu::-webkit-scrollbar,
+  .scrolling .sdrop::-webkit-scrollbar,
+  .scrolling .legalbody::-webkit-scrollbar{width:4px}
+  .scrolling .mobilemenu::-webkit-scrollbar-thumb,
+  .scrolling .sdrop::-webkit-scrollbar-thumb,
+  .scrolling .legalbody::-webkit-scrollbar-thumb{
+    background:rgba(0,75,92,.28);border-radius:999px}
+
+  /* ── ② 메뉴바 — 뒤 배경이 비쳐 글자가 안 보이던 것을 고친다 ──
+     ⚠ 기존은 위 86% → 아래 0% 라, 바다 배경 위에서 로고와 메뉴가 묻혔다.
+        흰 기를 올리고 뒤를 흐리게 해 글자가 또렷하게 읽히도록 한다. */
+  .nav::before{
+    background:linear-gradient(180deg,
+      rgba(255,255,255,.96) 0,
+      rgba(255,255,255,.92) 58%,
+      rgba(255,255,255,.72) 100%) !important;
+    -webkit-backdrop-filter:blur(10px);
+    backdrop-filter:blur(10px)}
+  .nav.scrolled::before{
+    background:rgba(255,255,255,.97) !important}
+
+  /* 메뉴가 열려 있을 때는 완전히 불투명하게 — 뒤 내용이 비치면 읽기 어렵다 */
+  .nav.menuopen::before{
+    background:#fff !important;
+    -webkit-backdrop-filter:none;backdrop-filter:none}
+
+  /* 배경이 밝아졌으므로 글자도 진하게 */
+  .nav .logo .l1{color:var(--brand-dark);-webkit-text-stroke:0;text-shadow:none}
+  .nav .logo .l2{color:var(--brand)}
+  .nav .langs button{color:var(--brand-mid)}
+  .nav .burger{color:var(--brand-dark)}
+}
+
 </style>
 </head>
 <body>
@@ -2634,7 +2685,8 @@ window.IMG          = {"/src/assets/images/ama_healmar_cleanser.jpg":"data:image
         return '<button data-lang="' + l + '" class="' + (S.lang === l ? 'on' : '') + '">' + l + '</button>';
       }).join('<span>/</span>') + '</div></div>' : '';
 
-    return '<nav class="nav' + (S.scrolled ? ' scrolled' : '') + '" id="main-nav"><div class="nav-in">' +
+    return '<nav class="nav' + (S.scrolled ? ' scrolled' : '') +
+      (S.mobileMenu ? ' menuopen' : '') + '" id="main-nav"><div class="nav-in">' +
       '<div class="langs">' + langs + '</div>' +
       '<button class="logo" data-go="home">' +
       /* B 두 개만 대문자 — 가운데 하이픈은 <em> 으로 감싸 색을 달리한다 */
@@ -4619,6 +4671,21 @@ window.IMG          = {"/src/assets/images/ama_healmar_cleanser.jpg":"data:image
         'これは参考訳です。韓国語版が優先します。')) + '</p>' : '') +
       '</div></div></div>';
   }
+
+  /* 스크롤바는 화면을 움직이는 동안에만 보인다.
+     ⚠ 휴대폰에서 늘 떠 있으면 내용을 가린다.
+        움직임이 멎고 1초가 지나면 다시 감춘다. */
+  var scrollTimer = null;
+  function markScrolling() {
+    document.documentElement.classList.add('scrolling');
+    if (scrollTimer) clearTimeout(scrollTimer);
+    scrollTimer = setTimeout(function () {
+      document.documentElement.classList.remove('scrolling');
+    }, 1000);
+  }
+  ['scroll', 'touchmove', 'wheel'].forEach(function (ev) {
+    window.addEventListener(ev, markScrolling, { passive: true, capture: true });
+  });
 
   function toast() {
     if (!S.toast) return '';
