@@ -3734,7 +3734,7 @@ window.IMG          = {"/src/assets/images/ama_healmar_cleanser.jpg":"data:image
       .then(function (d) {
         if (!d) return;
         S.board = { notices: d.notices || [], events: d.events || [] };
-        if (S.view === 'quiz') render();
+        if (S.view === 'quiz' && safeToRender()) render();
       }).catch(function () { });
   }
 
@@ -4174,6 +4174,18 @@ window.IMG          = {"/src/assets/images/ama_healmar_cleanser.jpg":"data:image
     } catch (e) { return normPosts(window.SEED_POSTS.slice()); }
   }
 
+  /* 지금 다시 그려도 되는 상황인지 본다.
+     ⚠ 입력 중이거나 창이 열려 있으면 다시 그리면 안 된다 —
+        치고 있던 글자가 사라진다. */
+  function safeToRender() {
+    var a = document.activeElement;
+    if (a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)) return false;
+    if (a && a.isContentEditable) return false;
+    if (S.pwAsk || S.boardForm) return false;
+    if (S.comm && (S.comm.state === 'write' || S.comm.state === 'detail')) return false;
+    return true;
+  }
+
   function loadPosts() {
     S.posts = localPosts();          /* 우선 화면을 채운다 */
     if (!COMMUNITY_API) return;
@@ -4184,7 +4196,7 @@ window.IMG          = {"/src/assets/images/ama_healmar_cleanser.jpg":"data:image
         .then(function (list) {
           if (!list || !list.length) return;
           S.posts = normPosts(list);
-          if (S.view === 'community') render();
+          if (S.view === 'community' && safeToRender()) render();
         })
         .catch(function () { /* 통신 실패 — 브라우저 저장 내용을 그대로 쓴다 */ });
     } catch (e) { }
