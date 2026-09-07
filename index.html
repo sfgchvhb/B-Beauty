@@ -5174,7 +5174,19 @@ window.IMG          = {"/src/assets/images/ama_healmar_cleanser.jpg":"data:image
          참여브랜드에 도착한 지점(snapTop)까지 구간에 넣으면, 거기서 조금만 움직여도
          계속 위로 끌려가 참여브랜드를 읽을 수 없다.
          snapTop 에서 80px 이상 위(= 히어로가 화면에 걸쳐 있는 상태)에서만 걸린다. */
-      var inHeroZone = y > 24 && y < snapTop - 80;
+      /* 아래로 갈 때 — 히어로가 아직 걸쳐 있는 동안만 (참여브랜드를 읽는 중에
+         위로 끌려가지 않도록 좁게 잡는다).
+         위로 갈 때 — 참여브랜드 시작점을 조금 지난 곳까지 넓힌다.
+         ⚠ 좁게 두면 참여브랜드에 막 도착한 자리에서 위로 굴려도 넘어가지 않는다.
+         ⚠ 여유값을 px 로 고정하면 **화면을 확대했을 때 어긋난다.**
+            확대하면 화면 높이(CSS 기준)가 줄어 같은 80px 도 훨씬 큰 비중이 된다.
+            → 화면 높이에 비례해서 잡는다. */
+      var vh = window.innerHeight || 800;
+      var gapDown = Math.round(vh * 0.075);   /* 아래로 — 화면의 약 7.5% */
+      var gapUp = Math.round(vh * 0.14);      /* 위로 — 화면의 약 14% */
+      var inHeroZone = down
+        ? (y > 24 && y < snapTop - gapDown)
+        : (y > 24 && y < snapTop + gapUp);
       if (Date.now() < calmUntil) {
         /* 다시 그린 직후 — 예약이 걸려 있으면 취소하고 판정은 건너뛴다 */
         if (pendingSnap) { clearTimeout(pendingSnap); pendingSnap = null; }
