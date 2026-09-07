@@ -135,6 +135,14 @@ module.exports = async function handler(req, res) {
     }
 
     /* ── 아래 작업은 모두 비밀번호(또는 관리자)가 필요하다 ── */
+    /* ⚠ 관리자 확인은 **글을 찾기 전에** 처리해야 한다.
+          글과 무관한데 아래 `postId` 검사에 걸려 「postId 가 없습니다」로 끝난다.
+          (2026-09-08 실제로 이 순서 때문에 관리자 로그인이 안 됐다) */
+    if (action === 'admin-check') {
+      res.status(isAdmin ? 200 : 403).json({ ok: isAdmin });
+      return;
+    }
+
     const postId = body.postId;
     if (!postId) { res.status(400).json({ error: 'postId 가 없습니다.' }); return; }
 
@@ -211,10 +219,6 @@ module.exports = async function handler(req, res) {
     }
 
     /* 관리자 로그인 확인만 하는 요청 */
-    if (action === 'admin-check') {
-      res.status(isAdmin ? 200 : 403).json({ ok: isAdmin });
-      return;
-    }
 
     res.status(400).json({ error: '알 수 없는 요청입니다.' });
   } catch (e) {
