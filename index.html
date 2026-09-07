@@ -2323,6 +2323,20 @@ footer .fgrid>div:first-child .sns{margin-top:0;margin-left:0}
   fill:none;stroke:currentColor;stroke-width:1.5;
   stroke-linejoin:round;stroke-linecap:round}
 .post .meta .cbox{gap:6px}
+/* 이벤트·공지 탭 — 글자가 커서 아이콘도 그만큼 키운다 */
+.tab .cico{width:15px;height:15px;stroke-width:1.35}
+/* 아이콘과 글자 사이 간격 — 그림 문자를 선 그림으로 바꾸며 함께 맞춘다 */
+.post .meta .w,.wmeta .w,.wmeta span,.ptag{display:inline-flex;align-items:center;gap:5px}
+
+/* 안내 배너 — 좁은 화면 (2026-09-08)
+   ⚠ 아이콘·닫기 단추가 고정 크기라 글자 자리가 좁아 문구가 뭉쳐 보였다. */
+@media (max-width:640px){
+  .toast{left:16px;right:16px;bottom:20px;transform:none;max-width:none;
+    gap:10px;padding:13px 14px;border-radius:14px}
+  .toast .ic{width:26px;height:26px;font-size:13px}
+  .toast .xbtn{width:28px;height:28px;font-size:14px;flex-shrink:0}
+  .toast p{font-size:13px;line-height:1.55;word-break:keep-all}
+}
 
 </style>
 </head>
@@ -3545,7 +3559,7 @@ window.IMG          = {"/src/assets/images/ama_healmar_cleanser.jpg":"data:image
       var firstImg = (String(f.content).match(/<img[^>]+src="([^"]+)"/) || [])[1];
       item = {
         id: evId, act: 'detail:' + evId,
-        feature: true, stub: false, pop: 'NEW', ic: '🎁',
+        feature: true, stub: false, pop: 'NEW',
         icColor: 'var(--brand)', catColor: 'var(--brand)',
         cat: f.category || '이벤트',
         title: f.title, desc: f.desc || plain.trim().slice(0, 90),
@@ -3651,8 +3665,8 @@ window.IMG          = {"/src/assets/images/ama_healmar_cleanser.jpg":"data:image
       }).join('') + '</span>' +
       '<span class="sep"></span>' +
       '<button data-rt="insertUnorderedList" title="' + L('목록', 'List', '列表', 'リスト') + '">≔</button>' +
-      '<button id="bf-img">🖼 ' + L('사진', 'Photo', '图片', '写真') + '</button>' +
-      '<button id="bf-vid">🎬 ' + L('영상', 'Video', '视频', '動画') + '</button>' +
+      '<button id="bf-img">' + L('사진', 'Photo', '图片', '写真') + '</button>' +
+      '<button id="bf-vid">' + L('영상', 'Video', '视频', '動画') + '</button>' +
       '</div>' +
       '<div id="bf-body" class="rtbody" contenteditable="true">' + (f.content || '') + '</div>' +
       '<input type="file" id="bf-imgfile" accept="image/*" multiple hidden>' +
@@ -3748,7 +3762,11 @@ window.IMG          = {"/src/assets/images/ama_healmar_cleanser.jpg":"data:image
     S.boardLoading = true;            /* 「불러오는 중」 표시 */
     boardPromise.then(function (d) {
       S.boardLoading = false;
-      if (d) S.board = { notices: d.notices || [], events: d.events || [] };
+      /* 서버가 답했다면 비어 있어도 그대로 따른다 (지운 것이 되살아나지 않게) */
+      if (d) {
+        S.board = { notices: d.notices || [], events: d.events || [] };
+        saveBoard();
+      }
       if (S.view === 'quiz' && safeToRender()) render();
     });
   }
@@ -3875,10 +3893,10 @@ window.IMG          = {"/src/assets/images/ama_healmar_cleanser.jpg":"data:image
     var evs = eventsData();
 
     var tabs = '<div class="tabwrap"><div class="tabs' + (S.evTab === 'notices' ? ' b' : '') + '">' +
-      '<button class="tab' + (S.evTab === 'events' ? ' on' : '') + '" data-evtab="events">🎁 ' +
+      '<button class="tab' + (S.evTab === 'events' ? ' on' : '') + '" data-evtab="events">' + giftIcon() +
       esc(pick('진행중인 이벤트', 'Active Events', '进行中活动', '開催中のイベント')) +
       '<span class="tc">' + evs.length + '</span></button>' +
-      '<button class="tab' + (S.evTab === 'notices' ? ' on' : '') + '" data-evtab="notices">🔔 ' +
+      '<button class="tab' + (S.evTab === 'notices' ? ' on' : '') + '" data-evtab="notices">' + bellIcon() +
       esc(pick('공지사항', 'Announcements', '公告通知', 'お知らせ')) +
       '<span class="tc">' + allNotices().length + '</span></button></div></div>';
 
@@ -4230,7 +4248,13 @@ window.IMG          = {"/src/assets/images/ama_healmar_cleanser.jpg":"data:image
     if (!postsPromise) { S.postsLoading = false; return; }
     postsPromise.then(function (list) {
       S.postsLoading = false;
-      if (list && list.length) S.posts = normPosts(list);
+      /* ⚠ 빈 배열([])도 서버의 답이다 — 「글이 없다」는 뜻이므로 그대로 따른다.
+            length 로만 판단하면 다른 기기에서 지운 글이 계속 남는다.
+            통신 실패는 null 이므로 그때만 브라우저 저장 내용을 쓴다. */
+      if (Array.isArray(list)) {
+        S.posts = normPosts(list);
+        savePosts();                 /* 브라우저 저장도 서버에 맞춘다 */
+      }
       if (S.view === 'community' && safeToRender()) render();
     });
   }
@@ -4384,6 +4408,39 @@ window.IMG          = {"/src/assets/images/ama_healmar_cleanser.jpg":"data:image
 
   /* 댓글 말풍선 — 글꼴 기호는 깨질 수 있어 직접 그린다.
      선 굵기와 색은 옆의 분류 뱃지에 맞춰 둔다. */
+  /* 선물 상자 (이벤트) */
+  function giftIcon() {
+    return '<svg class="cico" viewBox="0 0 16 16" aria-hidden="true">' +
+      '<rect x="2.2" y="6.6" width="11.6" height="7.2" rx="1"/>' +
+      '<path d="M1.4 4.2h13.2v2.4H1.4zM8 4.2v9.6"/>' +
+      '<path d="M8 4.2C6.9 2 5.4 1.6 4.7 2.2s-.2 2 3.3 2c3.5 0 4-1.4 3.3-2S9.1 2 8 4.2z"/></svg>';
+  }
+  /* 종 (공지) */
+  function bellIcon() {
+    return '<svg class="cico" viewBox="0 0 16 16" aria-hidden="true">' +
+      '<path d="M8 2c-2.2 0-3.6 1.6-3.6 3.7 0 3-1.2 3.7-1.2 4.6h9.6c0-.9-1.2-1.6-1.2-4.6C11.6 3.6 10.2 2 8 2z"/>' +
+      '<path d="M6.6 12.4a1.5 1.5 0 0 0 2.8 0"/></svg>';
+  }
+
+  /* 제품 꼬리표 */
+  function tagIcon() {
+    return '<svg class="cico" viewBox="0 0 16 16" aria-hidden="true">' +
+      '<path d="M8.6 2.2H13.4v4.8l-6.2 6.2-4.8-4.8z"/>' +
+      '<circle cx="11" cy="4.7" r="1"/></svg>';
+  }
+  /* 사람 */
+  function userIcon() {
+    return '<svg class="cico" viewBox="0 0 16 16" aria-hidden="true">' +
+      '<circle cx="8" cy="5.2" r="2.6"/>' +
+      '<path d="M2.9 13.6c0-2.6 2.3-4.2 5.1-4.2s5.1 1.6 5.1 4.2"/></svg>';
+  }
+  /* 달력 */
+  function dateIcon() {
+    return '<svg class="cico" viewBox="0 0 16 16" aria-hidden="true">' +
+      '<rect x="2.4" y="3.4" width="11.2" height="10.2" rx="1.4"/>' +
+      '<path d="M2.4 6.6h11.2M5.6 1.9v2.6M10.4 1.9v2.6"/></svg>';
+  }
+
   function chatIcon() {
     return '<svg class="cico" viewBox="0 0 16 16" aria-hidden="true">' +
       '<path d="M2.4 3.2h11.2v7.6H6.7L3.6 13.4v-2.6H2.4z"/></svg>';
@@ -4486,10 +4543,10 @@ window.IMG          = {"/src/assets/images/ama_healmar_cleanser.jpg":"data:image
           '<span class="bb brandtag">' + esc(brandById(p.brandId).name) + '</span>' +
           (p.rating ? starRow(p.rating) : '') +
           (p.fromOfficial ? '<span class="syncpill ok">' + esc(pick('공식몰', 'Official', '官方', '公式ストア')) + '</span>' : '') + '</span>' +
-          (p.productName ? '<span class="ptag">🏷 <span>' + esc(p.productName) + '</span></span>' : '') +
+          (p.productName ? '<span class="ptag">' + tagIcon() + '<span>' + esc(p.productName) + '</span></span>' : '') +
           '<span><h4>' + esc(maskBad(p.title)) + '</h4><span class="ex">' + esc(maskBad(p.content)) + '</span></span>' +
           '</span>' +
-          '<span class="meta"><span class="w">👤 ' + esc(maskBad(p.writer)) + '</span>' +
+          '<span class="meta"><span class="w">' + userIcon() + esc(maskBad(p.writer)) + '</span>' +
           '<span class="r"><span class="cbox">' + chatIcon() + (p.comments ? p.comments.length : 0) + '</span>' +
           '<span>' + esc(stampText(p)) + '</span></span></span></button></div>';
       }).join('') + '</div>'
@@ -4631,8 +4688,8 @@ window.IMG          = {"/src/assets/images/ama_healmar_cleanser.jpg":"data:image
       '<h5>' + esc(S.lang === 'KR' ? prod.name : prod.englishName) + '</h5>' +
       '<p class="pz">' + esc(priceText(prod)) + '</p></div></div>' +
 
-      '<div class="wmeta"><span class="w">👤 <b>' + esc(p.writer) + '</b></span>' +
-      '<span>📅 ' + esc(stampText(p)) + '</span>' +
+      '<div class="wmeta"><span class="w">' + userIcon() + '<b>' + esc(p.writer) + '</b></span>' +
+      '<span>' + dateIcon() + esc(stampText(p)) + '</span>' +
       '<span class="cbox">' + chatIcon() + (p.comments ? p.comments.length : 0) + '</span></div>' +
 
       '<p class="postbody">' + esc(maskBad(p.content)) + '</p>' +
