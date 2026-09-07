@@ -2338,6 +2338,12 @@ footer .fgrid>div:first-child .sns{margin-top:0;margin-left:0}
   .toast p{font-size:13px;line-height:1.55;word-break:keep-all}
 }
 
+/* 비밀번호 칸 — 화면에서만 가린다 (2026-09-08)
+   ⚠ `type="password"` 를 쓰면 크롬이 계정 비밀번호로 보고
+      「유출된 비밀번호」 경고를 띄운다. 우리 4자리 숫자는 그런 값이 아니다.
+      보통 칸으로 두고 여기서 가린다. */
+.pwmask{-webkit-text-security:disc;text-security:disc}
+
 </style>
 </head>
 <body>
@@ -4599,7 +4605,8 @@ window.IMG          = {"/src/assets/images/ama_healmar_cleanser.jpg":"data:image
       '<input id="f-writer" value="' + esc(f.writer) + '" placeholder="' + esc(t.inputWriter) + '"></div>' +
       '<div class="field"><label>' + esc(pick('비밀번호', 'Password', '密码', 'パスワード')) +
       ' <span class="opt">' + esc(pick('숫자 4자리', '4 digits', '4位数字', '数字4桁')) + '</span></label>' +
-      '<input id="f-pw" type="password" inputmode="numeric" maxlength="4" autocomplete="off"' +
+      '<input id="f-pw" class="pwmask" type="text" inputmode="numeric" maxlength="4"' +
+      ' autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"' +
       ' value="' + esc(f.pw || '') + '" placeholder="••••"' +
       (f.editing ? ' disabled' : '') + '></div></div>' +
       (f.editing ? '' :
@@ -4719,7 +4726,8 @@ window.IMG          = {"/src/assets/images/ama_healmar_cleanser.jpg":"data:image
       /* 댓글도 글과 마찬가지로 비밀번호로 지킨다 */
       '<div class="field"><label>' + esc(pick('비밀번호', 'Password', '密码', 'パスワード')) +
       ' <span class="opt">' + esc(pick('숫자 4자리', '4 digits', '4位数字', '数字4桁')) + '</span></label>' +
-      '<input id="cm-pw" type="password" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="••••"></div>' +
+      '<input id="cm-pw" class="pwmask" type="text" inputmode="numeric" maxlength="4"' +
+      ' autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="••••"></div>' +
       '<div class="field"><label>' + esc(t.addComment) + '</label>' +
       '<input id="cm-content" placeholder="' + esc(t.commentPlaceholder) + '"></div></div>' +
       '<div class="formfoot"><button class="btn btn-solid btn-sq" id="comment-submit">' +
@@ -4788,7 +4796,7 @@ window.IMG          = {"/src/assets/images/ama_healmar_cleanser.jpg":"data:image
     return '<div class="overlay" data-close="pw"><div class="sheet pwsheet" data-stop="1">' +
       '<button class="xbtn" data-close="pw" aria-label="close">✕</button>' +
       '<h3>' + esc(title) + '</h3><p class="pd">' + esc(desc) + '</p>' +
-      '<input id="pw-input" type="password" ' +
+      '<input id="pw-input" class="pwmask" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" ' +
       (a === 'admin' ? 'autocomplete="off"' : 'inputmode="numeric" maxlength="4"') +
       ' placeholder="' + (a === 'admin' ? '••••••••' : '••••') + '">' +
       '<p class="pwerr" id="pw-err"></p>' +
@@ -5514,6 +5522,15 @@ window.IMG          = {"/src/assets/images/ama_healmar_cleanser.jpg":"data:image
         if (btn) btn.click();
       });
     }
+    /* ⚠ 화면에서 가리는 기능(-webkit-text-security)을 지원하지 않는 브라우저에서는
+          글자가 그대로 보인다 → 그때만 원래 방식으로 되돌린다. */
+    (function () {
+      var can = false;
+      try { can = window.CSS && CSS.supports && CSS.supports('-webkit-text-security', 'disc'); } catch (e) { }
+      if (can) return;
+      document.querySelectorAll('input.pwmask').forEach(function (el) { el.type = 'password'; });
+    })();
+
     enterTo('pw-input', 'pw-ok');            /* 관리자 로그인 · 글/댓글 비밀번호 확인 */
     /* 창이 열리면 바로 입력할 수 있게 커서를 놓는다 */
     var pwIn = el('pw-input');
