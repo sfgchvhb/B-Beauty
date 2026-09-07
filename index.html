@@ -967,8 +967,12 @@ h1,h2,h3,h4,h5{margin:0}
 }
 .post .meta .w{display:flex;align-items:center;gap:6px;color:var(--ink);font-weight:600}
 .post .meta .r{display:flex;align-items:center;gap:12px}
-.post .meta .cbox{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:6px;
-  background:var(--panel);border:1px solid var(--line)}
+/* ⚠ 게시판 분류 뱃지(.bb)와 모양을 맞춘다 — 같은 줄에 나란히 놓이므로
+      모서리·글자·여백이 다르면 눈에 띈다 (2026-09-08). */
+.post .meta .cbox{display:inline-flex;align-items:center;gap:5px;
+  padding:2px 11px;border-radius:999px;
+  font-family:var(--font);font-size:11px;font-weight:700;
+  background:var(--panel);border:1px solid var(--line2);color:var(--brand-mid)}
 .formpanel{max-width:680px;margin:0 auto;background:#fff;border:1px solid var(--line);border-radius:26px;
   padding:30px;display:grid;gap:24px;box-shadow:0 14px 38px rgba(0,54,66,.08)}
 .formhead{display:flex;flex-direction:column;gap:16px;justify-content:space-between;padding-bottom:18px;
@@ -2308,7 +2312,17 @@ footer .rt [data-adminlogin].on{color:var(--brand);font-weight:700}
       당기면 그만큼 왼쪽으로 튀어나온다. */
 footer .fgrid>div:first-child .sns{margin-top:0;margin-left:0}
 
+/* 서버에서 받아오는 동안 (2026-09-08) */
+.loadingline{opacity:.65;animation:lgPulse 1.1s ease-in-out infinite}
+@keyframes lgPulse{0%,100%{opacity:.45}50%{opacity:.8}}
 
+/* 댓글 말풍선 아이콘 (2026-09-08)
+   ⚠ 글꼴 기호는 깨지거나 색이 들어간 그림으로 나와 직접 그렸다.
+      선 굵기·색을 옆 분류 뱃지에 맞춘다. */
+.cico{width:11px;height:11px;flex:none;
+  fill:none;stroke:currentColor;stroke-width:1.5;
+  stroke-linejoin:round;stroke-linecap:round}
+.post .meta .cbox{gap:6px}
 
 </style>
 </head>
@@ -2351,6 +2365,7 @@ window.IMG          = {"/src/assets/images/ama_healmar_cleanser.jpg":"data:image
     menu: null,               /* 지금 열려 있는 점 세 개 메뉴 */
     legal: null,              /* 'terms' | 'privacy' */
     board: { notices: [], events: [] },   /* 관리자가 올린 이벤트·공지 */
+    postsLoading: false, boardLoading: false,   /* 서버에서 받아오는 중인지 */
     boardForm: null,          /* 이벤트·공지 작성 화면 */
     pwAsk: null,              /* 비밀번호 확인 창 { postId, action } */
     brandFilter: 'All', category: 'All', concern: 'All', sort: 'featured', query: '',
@@ -3729,13 +3744,13 @@ window.IMG          = {"/src/assets/images/ama_healmar_cleanser.jpg":"data:image
     } catch (e) { S.board = { notices: [], events: [] }; }
     if (!S.board.notices) S.board.notices = [];
     if (!S.board.events) S.board.events = [];
-    if (!COMMUNITY_API) return;
-    fetch(COMMUNITY_API + '?kind=board').then(function (r) { return r.ok ? r.json() : null; })
-      .then(function (d) {
-        if (!d) return;
-        S.board = { notices: d.notices || [], events: d.events || [] };
-        if (S.view === 'quiz' && safeToRender()) render();
-      }).catch(function () { });
+    if (!COMMUNITY_API || !boardPromise) return;
+    S.boardLoading = true;            /* 「불러오는 중」 표시 */
+    boardPromise.then(function (d) {
+      S.boardLoading = false;
+      if (d) S.board = { notices: d.notices || [], events: d.events || [] };
+      if (S.view === 'quiz' && safeToRender()) render();
+    });
   }
 
   function saveBoard() {
@@ -3877,7 +3892,8 @@ window.IMG          = {"/src/assets/images/ama_healmar_cleanser.jpg":"data:image
         /* 등록된 이벤트가 하나도 없을 때 — 공지·커뮤니티와 같은 문구를 쓰고,
            페이지 버튼은 자리를 지키도록 그대로 보여 준다. */
         body = '<div class="nempty"><span class="ic">◌</span>' +
-          esc(pick('등록된 내용이 없습니다.', 'Nothing has been posted yet.', '尚无发布的内容。', '掲載されている内容はありません。')) +
+          esc(S.boardLoading ? pick('불러오는 중…', 'Loading…', '加载中…', '読み込み中…')
+            : pick('등록된 내용이 없습니다.', 'Nothing has been posted yet.', '尚无发布的内容。', '掲載されている内容はありません。')) +
           '</div>' + pager(1, 1, 'data-evpage', true);
         body = adminBar + body;
       }
@@ -3969,7 +3985,8 @@ window.IMG          = {"/src/assets/images/ama_healmar_cleanser.jpg":"data:image
           : '<div class="nempty"><span class="ic">◌</span>' +
           /* 아예 등록된 게 없을 때와 검색 결과가 없을 때를 구분해 안내한다 */
           esc(allNotices().length === 0
-            ? pick('등록된 내용이 없습니다.', 'Nothing has been posted yet.', '尚无发布的内容。', '掲載されている内容はありません。')
+            ? (S.boardLoading ? pick('불러오는 중…', 'Loading…', '加载中…', '読み込み中…')
+              : pick('등록된 내용이 없습니다.', 'Nothing has been posted yet.', '尚无发布的内容。', '掲載されている内容はありません。'))
             : pick('검색 결과에 부합하는 공지사항이 존재하지 않습니다.', 'No announcements found matching the search.', '未检索到符合条件的公告通知。', '検索条件に合うお知らせがありません。')) + '</div>') +
         pager(S.noticePage, window.__nPages || 1, 'data-npage', true) +
         '</div>';
@@ -4186,20 +4203,36 @@ window.IMG          = {"/src/assets/images/ama_healmar_cleanser.jpg":"data:image
     return true;
   }
 
+  /* ⚠ 서버 요청은 **화면을 그리기 전에 미리 띄운다.**
+        그리는 동안 통신이 함께 진행돼 기다리는 시간이 줄어든다.
+        (여기서 곧바로 시작하고, loadPosts() 는 그 결과만 받는다) */
+  var postsPromise = null, boardPromise = null;
+  if (COMMUNITY_API) {
+    try {
+      postsPromise = fetch(COMMUNITY_API, { headers: { 'Accept': 'application/json' } })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .catch(function () { return null; });
+      boardPromise = fetch(COMMUNITY_API + '?kind=board')
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .catch(function () { return null; });
+    } catch (e) { postsPromise = null; boardPromise = null; }
+  }
+
+  function loadingLine() {
+    return '<p class="emptyline loadingline">' +
+      esc(pick('불러오는 중…', 'Loading…', '加载中…', '読み込み中…')) + '</p>';
+  }
+
   function loadPosts() {
     S.posts = localPosts();          /* 우선 화면을 채운다 */
     if (!COMMUNITY_API) return;
-    /* 서버가 있으면 그 내용으로 바꾼다 */
-    try {
-      fetch(COMMUNITY_API, { headers: { 'Accept': 'application/json' } })
-        .then(function (r) { return r.ok ? r.json() : null; })
-        .then(function (list) {
-          if (!list || !list.length) return;
-          S.posts = normPosts(list);
-          if (S.view === 'community' && safeToRender()) render();
-        })
-        .catch(function () { /* 통신 실패 — 브라우저 저장 내용을 그대로 쓴다 */ });
-    } catch (e) { }
+    S.postsLoading = true;           /* 「불러오는 중」 표시 */
+    if (!postsPromise) { S.postsLoading = false; return; }
+    postsPromise.then(function (list) {
+      S.postsLoading = false;
+      if (list && list.length) S.posts = normPosts(list);
+      if (S.view === 'community' && safeToRender()) render();
+    });
   }
   /* 커뮤니티 글 번역 — 영어·중국어에서는 posts_tr.json 의 내용을 대신 보여준다.
      번역이 없는 글(사용자가 직접 쓴 글 등)은 원문 그대로. */
@@ -4349,6 +4382,13 @@ window.IMG          = {"/src/assets/images/ama_healmar_cleanser.jpg":"data:image
     return false;
   }
 
+  /* 댓글 말풍선 — 글꼴 기호는 깨질 수 있어 직접 그린다.
+     선 굵기와 색은 옆의 분류 뱃지에 맞춰 둔다. */
+  function chatIcon() {
+    return '<svg class="cico" viewBox="0 0 16 16" aria-hidden="true">' +
+      '<path d="M2.4 3.2h11.2v7.6H6.7L3.6 13.4v-2.6H2.4z"/></svg>';
+  }
+
   /* 점 세 개 메뉴 — 글과 댓글에 함께 쓴다.
      kind: 'post' | 'comment' (댓글은 id 가 「글번호|댓글번호」 형태) */
   function kebab(id, kind) {
@@ -4450,14 +4490,15 @@ window.IMG          = {"/src/assets/images/ama_healmar_cleanser.jpg":"data:image
           '<span><h4>' + esc(maskBad(p.title)) + '</h4><span class="ex">' + esc(maskBad(p.content)) + '</span></span>' +
           '</span>' +
           '<span class="meta"><span class="w">👤 ' + esc(maskBad(p.writer)) + '</span>' +
-          '<span class="r"><span class="cbox">▱ ' + (p.comments ? p.comments.length : 0) + '</span>' +
+          '<span class="r"><span class="cbox">' + chatIcon() + (p.comments ? p.comments.length : 0) + '</span>' +
           '<span>' + esc(stampText(p)) + '</span></span></span></button></div>';
       }).join('') + '</div>'
         /* 상자 없이 문구만 — 글이 없을 때 화면이 답답해 보이지 않게 (2026-08-27) */
-        : '<p class="emptyline">' +
-        esc((S.posts || []).length === 0
-          ? pick('등록된 내용이 없습니다.', 'Nothing has been posted yet.', '尚无发布的内容。', '掲載されている内容はありません。')
-          : t.noResults) + '</p>') +
+        : (S.postsLoading ? loadingLine()
+          : '<p class="emptyline">' +
+          esc((S.posts || []).length === 0
+            ? pick('등록된 내용이 없습니다.', 'Nothing has been posted yet.', '尚无发布的内容。', '掲載されている内容はありません。')
+            : t.noResults) + '</p>')) +
       pager(S.postPage, window.__pPages || 1, 'data-ppage', true) +
       '</div>';
 
@@ -4592,7 +4633,7 @@ window.IMG          = {"/src/assets/images/ama_healmar_cleanser.jpg":"data:image
 
       '<div class="wmeta"><span class="w">👤 <b>' + esc(p.writer) + '</b></span>' +
       '<span>📅 ' + esc(stampText(p)) + '</span>' +
-      '<span>▱ ' + (p.comments ? p.comments.length : 0) + '</span></div>' +
+      '<span class="cbox">' + chatIcon() + (p.comments ? p.comments.length : 0) + '</span></div>' +
 
       '<p class="postbody">' + esc(maskBad(p.content)) + '</p>' +
       /* 글쓴이가 올린 사진 */
