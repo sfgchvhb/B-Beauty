@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>B-BEAUTY | K-뷰티 연합 플랫폼</title>
+<title>B-Beauty | K-뷰티 연합 플랫폼</title>
 <!-- 네이버 서치어드바이저 소유 확인 (2026-09-14) — 지우면 등록이 풀린다 -->
 <meta name="naver-site-verification" content="c1603df26eb96a184372163957bbfc122965dd65" />
 
@@ -12,8 +12,8 @@
         index.html 안에 내장된 사진은 주소가 없어 쓸 수 없다. -->
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="B-Beauty">
-<meta property="og:title" content="B-Beauty | 부산 화장품 브랜드 연합 플랫폼">
-<meta property="og:description" content="시에스킨·숲의 사랑·엘다라·슌유·힐마르. 다섯 브랜드의 제품과 이야기를 한자리에서 만나보세요.">
+<meta property="og:title" content="B-Beauty | K-뷰티 연합 플랫폼">
+<meta property="og:description" content="다양한 브랜드의 제품과 이야기를 한자리에서 만나보세요.">
 <meta property="og:url" content="https://www.bbeauty.co.kr/">
 <meta property="og:image" content="https://www.bbeauty.co.kr/og-image.jpg">
 <meta property="og:image:width" content="1376">
@@ -29,7 +29,7 @@ gtag('js', new Date());
       GA4 는 원래부터 IP 를 저장하지 않으므로 따로 설정할 것이 없다. */
 gtag('config', 'G-YKQBXR25H8');
 </script>
-<meta name="description" content="K-뷰티 브랜드 연합 플랫폼 B-Wave. 시에스킨·숲의 사랑·엘다라·슌유·힐마르의 제품을 한자리에서 비교하고 공식몰에서 바로 구매하세요.">
+<meta name="description" content="K-뷰티 브랜드 연합 플랫폼 B-Beauty. 다양한 브랜드의 제품을 한자리에서 비교하고 공식몰에서 바로 구매하세요.">
 <style>
 /* ─── Quentin (Hermansyah / Get Studio) — 홈 화면 B-Beauty 로고 전용 ──
    Copyright (c) 2016 by Hermansyah. All rights reserved.
@@ -2432,7 +2432,8 @@ window.IMG          = {"/src/assets/images/ama_healmar_cleanser.jpg":"data:image
      ========================================================= */
   var SNS = [
     { id: 'instagram', label: 'Instagram', url: 'https://www.instagram.com/bbeauty.ko' },
-    { id: 'tiktok', label: 'TikTok', url: 'https://www.tiktok.com/@bbeauty_ko' }
+    { id: 'tiktok', label: 'TikTok', url: 'https://www.tiktok.com/@bbeauty_ko' },
+    { id: 'youtube', label: 'YouTube', url: 'https://www.youtube.com/@bbeauty_ko' }
   ];
 
   /* 아이콘은 글꼴이 아니라 그림(SVG)이라 어떤 기기에서도 같은 모양으로 보인다 */
@@ -2442,6 +2443,13 @@ window.IMG          = {"/src/assets/images/ama_healmar_cleanser.jpg":"data:image
         '<rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="1.8"/>' +
         '<circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.8"/>' +
         '<circle cx="17.2" cy="6.8" r="1.2" fill="currentColor"/></svg>';
+    }
+    if (id === 'youtube') {
+      /* 둥근 네모 + 가운데 재생 삼각형. 세로 6~18 이라 다른 둘과 무게가 맞는다. */
+      return '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">' +
+        '<rect x="2.2" y="5.6" width="19.6" height="12.8" rx="3.6" fill="none" ' +
+        'stroke="currentColor" stroke-width="1.8"/>' +
+        '<path d="M10.3 9.4l5.1 2.6-5.1 2.6z" fill="currentColor"/></svg>';
     }
     /* ⚠ 인스타그램 아이콘과 같은 규격을 지킬 것 —
        세로 3~21(높이 18), 중심 (12,12). 벗어나면 나란히 뒀을 때
@@ -3387,8 +3395,8 @@ window.IMG          = {"/src/assets/images/ama_healmar_cleanser.jpg":"data:image
     var list = filteredProducts();
     var ab = S.brandFilter === 'All' ? null : brandById(S.brandFilter);
 
-    var brandTabs = '<div class="dirbar"><div class="dl">BRAND / ' +
-      esc(pick('브랜드 소분류', 'Sub-category', '品牌分类', 'ブランド分類')) + '</div><div class="dp">' +
+    /* 뒤의 「/ 브랜드 소분류」는 삭제했다 (2026-09-14) */
+    var brandTabs = '<div class="dirbar"><div class="dl">BRAND</div><div class="dp">' +
       '<button class="dirpill' + (S.brandFilter === 'All' ? ' on' : '') + '" data-bf="All">' +
       esc(T('products.all_brands')) + '</button>' +
       brands().map(function (b) {
