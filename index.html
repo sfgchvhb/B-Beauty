@@ -1892,9 +1892,11 @@ footer .snsbtn:hover{color:#fff;border-color:rgba(255,255,255,.6);
   background:rgba(255,255,255,.1)}
 
 
-/* 커뮤니티 사이드바 — 좁으므로 가로로 꽉 채운다 */
-.commside .sns{margin-top:10px}
-.commside .snsbtn{flex:1;justify-content:flex-start;padding:0 12px}
+/* 커뮤니티 사이드바 — 좁으므로 글자 길이만큼만, 모자라면 줄바꿈 (2026-09-14)
+   ⚠ `flex:1` 로 칸을 똑같이 나누면 버튼이 글자보다 좁아져 문구가 삐져나온다. */
+.commside .sns{margin-top:10px;gap:8px}
+.commside .snsbtn{flex:0 0 auto;min-width:0;justify-content:center;
+  padding:0 12px;white-space:nowrap}
 
 /* 히어로의 「참여 브랜드 살펴보기」 아래 SNS (2026-08-26)
    ⚠ 버튼 옆에 두면 버튼 끝의 → 화살표가 SNS 를 가리키는 것처럼 보여 아래로 내렸다.
