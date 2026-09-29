@@ -4690,10 +4690,12 @@ window.IMG          = {"/src/assets/images/ama_healmar_cleanser.jpg":"data:image
       (list.length ? '<div class="posts">' + list.map(function (p0) {
         var p = postTr(p0);
         var prod = postProduct(p);
+        /* 썸네일 — 글쓴이가 올린 첫 번째 사진, 없으면 고른 제품의 사진 (2026-09-29)
+           ⚠ 우측 하단의 분류 표시(Skincare 등)는 뺐다 — 사용자 요청 */
+        var thumb = (p.photos && p.photos[0]) || prod.image;
         return '<div class="postwrap">' + kebab(p.id, 'post') +
           '<button class="post" id="post-card-' + esc(p.id) + '" data-cpost="' + esc(p.id) + '">' +
-          '<span class="th">' + imgTag(prod.image, '', prod.brandId, ' loading="lazy"') +
-          '<span class="pc">' + esc(prod.category) + '</span></span>' +
+          '<span class="th">' + imgTag(thumb, '', prod.brandId, ' loading="lazy"') + '</span>' +
           '<span class="bd">' +
           '<span class="pbadges">' + boardBadge(p.boardCategory || 'review') +
           '<span class="bb brandtag">' + esc(brandById(p.brandId).name) + '</span>' +
