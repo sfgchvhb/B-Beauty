@@ -2670,6 +2670,19 @@ footer .fgrid>div:first-child .sns{margin-top:0;margin-left:0}
   .hero-cine{--hero-bleed:120px;padding-bottom:var(--hero-bleed);
     min-height:calc(max(calc(100lvh - var(--nav-real, var(--nav-h)) + 1px), calc(var(--ih, 0px) - var(--nav-real, var(--nav-h)) + 1px)) + var(--hero-bleed))}
 }
+/* 휴대폰 — 띠를 화면 아래에 「붙이지」 않는다 (2026-10-29 ⑤, 사용자 요청: 띠 하단 고정 해제)
+   ⚠ 아이폰 사파리(iOS 26)는 화면 아래에 붙어 있는(sticky) 요소가 있으면 아래 도구막대를 색으로 칠한다.
+      띠 배경을 안쪽(::before)으로 옮긴 ④ 방식도 실제 아이폰에서는 베이지로 칠해졌다.
+   → 휴대폰(640px 이하 · 가로로 눕힌 폰 = 높이 500px 이하)에서는 sticky 를 풀고, 띠를 히어로 안 제자리에 둔다.
+      자리 = 「주소창이 펴져 있을 때 보이는 화면(100svh)」 맨 아래 — 맨 위로 올렸을 때(주소창이 펴진 상태) 띠가 화면 맨 아래에 온다.
+      그 아래 120px 는 히어로 배경(바다)이라, 투명한 도구막대 뒤로 B-Wave 경계 대신 바다가 비친다.
+      계산 코드·스크롤 중 바뀌는 값(--ih, dvh)을 쓰지 않아 흔들리지 않는다.
+   · 태블릿은 sticky 그대로 (아래 도구막대 색 문제 없음 · 손가락 스크롤 흔들림 해결된 상태 유지) */
+@media (pointer:coarse) and (max-width:640px), (pointer:coarse) and (max-height:500px){
+  .hero-cine{min-height:calc(100vh - var(--nav-real, var(--nav-h)) + 1px + var(--hero-bleed, 120px));
+             min-height:calc(100svh - var(--nav-real, var(--nav-h)) + 1px + var(--hero-bleed, 120px))}
+  .hero-cine .hero-foot{position:relative;bottom:auto;margin-top:0}
+}
 
 /* =========================================================
    메뉴바 — 폭에 따른 정리 (2026-10-29)
