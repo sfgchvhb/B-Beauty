@@ -1153,6 +1153,10 @@ footer .fbot .rt{display:flex;flex-wrap:wrap;align-items:center;gap:14px;justify
         아래 화면(참여브랜드)이 살짝 보인다. */
   :root{--nav-h:64px}
   .nav{position:sticky;padding:12px 0;background:rgba(255,255,255,.95);border-bottom:1px solid rgba(0,75,92,.1)}
+  /* ⚠ 스크롤 뒤 메뉴바(.nav.scrolled)는 PC 규칙이 14px 여백이라 휴대폰에서는 오히려 4px 커졌다.
+        그 순간 메뉴바 높이를 재면(주소창이 접힐 때 resize) 히어로가 4px 짧아져 맨 위에서 아래 칸이 비치고 띠가 들떴다 (2026-10-29 실제 폰에서 발생).
+        → 휴대폰·태블릿에서는 스크롤 전후 높이를 똑같이 둔다. */
+  .nav.scrolled{padding:12px 0}
   .nav-in{flex-wrap:wrap}
   .nav .langs,.navmenu{display:none}
   .logo{align-items:flex-start}
@@ -2607,14 +2611,13 @@ footer .fgrid>div:first-child .sns{margin-top:0;margin-left:0}
   .cine{min-height:calc(100vh - var(--nav-real, var(--nav-h)) + 1px);
         min-height:calc(100lvh - var(--nav-real, var(--nav-h)) + 1px)}
 }
-@supports (height:100dvh){
-  /* 맨 아래 띠 — 지금 보이는 화면의 맨 아래에 (펴진 도구막대 높이만큼 올린다). +1px 은 히어로의 +1px 과 짝 */
-  .hero-foot{bottom:calc(100lvh - 100dvh)}
-  /* 가운데 내용 — 높이는 그대로 두고 펴진 도구막대의 절반만큼 위로 (자리를 늘리면 히어로가 길어져 띠가 다시 숨는다) */
-  .hero-in,.home-in{position:relative;top:calc((100dvh - 100lvh) / 2)}
-}
-@supports (height:100dvh){
-  @media (max-width:1279px){ .hero-foot{bottom:calc(100lvh - 100dvh + 1px)} }
+/* 맨 아래 띠 · 가운데 내용 — 펴진 도구막대만큼 올린다. 올릴 양(--foot-up)은 app.js syncHeroFoot() 가 실제로 재서 넣는다.
+   (2026-10-29 — CSS 의 100dvh 는 태블릿을 돌린 직후 예전 값이 남아 띠가 들떠서 바꿈) */
+.hero-foot{bottom:var(--foot-up, 0px)}
+.hero-in,.home-in{position:relative;top:calc(var(--foot-up, 0px) / -2)}
+@media (max-width:1279px){
+  /* 높이 — 가장 큰 화면(100lvh)과 지금 보이는 높이(--ih) 중 큰 쪽. 회전 직후 lvh 가 예전 값이어도 짧아지지 않게 */
+  .cine{min-height:max(calc(100lvh - var(--nav-real, var(--nav-h)) + 1px), calc(var(--ih, 0px) - var(--nav-real, var(--nav-h)) + 1px))}
 }
 
 /* =========================================================
@@ -5813,14 +5816,55 @@ window.IMG          = {"/src/assets/images/ama_healmar_cleanser.jpg":"data:image
         아래 B-Wave 가 얇게 삐져나와 보였다 → 실제 높이를 재서 --nav-real 로 넘긴다.
      ⚠ 휴대폰 메뉴가 열려 있을 때는 메뉴바가 길어지므로 재지 않는다. */
   function syncNavH() {
-    if (S.mobileMenu) return;
-    var n = document.querySelector('.nav');
-    if (!n) return;
-    var h = n.getBoundingClientRect().height;
-    if (h > 0 && h < 200) document.documentElement.style.setProperty('--nav-real', h + 'px');
+    var root = document.documentElement;
+    var ih = window.innerHeight || 0;
+    /* 지금 보이는 화면 높이 — 회전 직후에도 정확한 값 (CSS 의 100dvh 는 회전 뒤 한동안 예전 값이 남는 기기가 있다) */
+    if (ih > 0) root.style.setProperty('--ih', ih + 'px');
+    if (!S.mobileMenu) {
+      var n = document.querySelector('.nav');
+      var h = n ? n.getBoundingClientRect().height : 0;
+      if (h > 0 && h < 200) root.style.setProperty('--nav-real', h + 'px');
+    }
+    syncHeroFoot();
+  }
+
+  /* 히어로 맨 아래 띠(K-Beauty Cooperative)를 「지금 보이는 화면」 맨 아래에 맞춘다 (2026-10-29)
+     ⚠ 예전에는 CSS 로 calc(100lvh - 100dvh) 만큼 올렸는데, 태블릿을 가로 → 세로로 돌리면
+        100dvh 가 예전 값으로 남아 띠가 위로 들떴다.
+     → 실제 위치를 잰다: 맨 위에 있을 때 히어로 아래끝이 화면 아래보다 얼마나 더 내려가 있는지(넘친 만큼),
+        그리고 그중 「도구막대 때문에 가려진 만큼」(가장 큰 화면 높이 − 지금 보이는 높이)만 올린다.
+        내용이 길어 히어로가 길어진 경우(낮은 노트북 등)에는 올리지 않는다 — 예전 동작 그대로. */
+  var lvhProbe = null;
+  function bigViewport() {
+    try {
+      if (!lvhProbe) {
+        lvhProbe = document.createElement('div');
+        lvhProbe.setAttribute('aria-hidden', 'true');
+        lvhProbe.style.cssText = 'position:fixed;left:0;top:0;width:0;height:100vh;height:100lvh;visibility:hidden;pointer-events:none';
+        document.body.appendChild(lvhProbe);
+      }
+      if (!lvhProbe.isConnected) document.body.appendChild(lvhProbe);
+      return lvhProbe.offsetHeight || 0;
+    } catch (e) { return 0; }
+  }
+  function syncHeroFoot() {
+    var root = document.documentElement;
+    var hero = document.querySelector('.view .cine') || document.querySelector('.cine');
+    if (!hero) { root.style.setProperty('--foot-up', '0px'); return; }
+    var ih = window.innerHeight || 0;
+    var heroBottom = hero.getBoundingClientRect().bottom + (window.pageYOffset || 0);   /* 문서 맨 위 기준 */
+    var below = heroBottom - ih;                     /* 맨 위에 있을 때 화면 밖으로 넘친 만큼 */
+    var bar = bigViewport() - ih;                    /* 지금 펴져 있는 주소창·도구막대 높이 */
+    /* +1 — 히어로를 1px 길게 잡아 둔 것(반올림 선 방지)만큼 띠도 화면 안으로 */
+    var up = Math.max(0, Math.min(below, bar + 1));
+    root.style.setProperty('--foot-up', Math.round(up) + 'px');
   }
   window.addEventListener('resize', syncNavH);
-  window.addEventListener('orientationchange', syncNavH);
+  window.addEventListener('orientationchange', function () {
+    /* 회전 직후에는 크기가 늦게 정해지는 기기가 있어 몇 번 더 잰다 */
+    syncNavH(); setTimeout(syncNavH, 250); setTimeout(syncNavH, 700); setTimeout(syncNavH, 1500);
+  });
+  try { if (window.visualViewport) window.visualViewport.addEventListener('resize', syncNavH); } catch (e) { }
   try { if (document.fonts && document.fonts.ready) document.fonts.ready.then(syncNavH); } catch (e) { }
 
   function wire() {
