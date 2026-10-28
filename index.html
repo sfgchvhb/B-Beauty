@@ -2633,6 +2633,13 @@ footer .fgrid>div:first-child .sns{margin-top:0;margin-left:0}
   .hero-cine .hero-foot{margin-top:calc(100lvh - 100svh)}
 }
 @media (max-width:640px) and (pointer:coarse){ .hero-cine .hero-foot{margin-left:-20px;margin-right:-20px} }
+/* 띠 색을 단색으로 (2026-10-29 ③)
+   ⚠ 아이폰 사파리(iOS 26)는 화면 맨 아래에 붙어 있는 요소의 배경색으로 아래 도구막대를 칠한다.
+      띠가 반투명(rgba)이라 그 색을 못 쓰고 사이트 기본 배경(베이지)으로 칠해,
+      사업소개 맨 위에 닿는 순간 아래 도구막대가 베이지로 바뀌었다 (사용자 실제 기기).
+   → 띠를 지금 보이는 색과 같은 짙은 청록 **단색**으로 — 도구막대도 같은 색으로 이어지게.
+      (휴대폰 화면에서 띠가 실제로 보이던 평균색 ≈ rgb(36,77,86)) */
+@media (pointer:coarse){ .hero-cine .hero-foot{background:#244d56} }
 /* 키가 작은 화면 — 띠가 화면 맨 아래에 붙으면 아래쪽 SNS 아이콘·Scroll Down 을 덮었다
    (아이폰 SE 등 휴대폰 · 가로로 눕힌 태블릿에서 주소창이 펴져 있을 때)
    → 그 경우에만 위·사이 여백을 화면 높이에 맞춰 조금씩 줄인다. 충분히 크면 예전 여백 그대로.
