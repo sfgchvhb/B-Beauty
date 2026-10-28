@@ -2590,6 +2590,14 @@ footer .fgrid>div:first-child .sns{margin-top:0;margin-left:0}
 /* 도구 막대와 글 쓰는 칸을 붙인다 (둘이 한 상자로 보이게 — 칸 사이 간격 8px 를 메움) */
 .boardform .rtbar + .rtbody{margin-top:-8px}
 
+/* 휴대폰·태블릿(메뉴바가 자리를 차지하는 폭) — 히어로 높이를 「화면 − 실제 메뉴바 높이」로 정확히 (2026-10-28)
+   --nav-real 은 app.js syncNavH() 가 잰 실제 높이. 못 쟀으면 예전 값(--nav-h)을 쓴다.
+   +1px — 소수점 반올림으로 아래 B-Wave 가 0.5px 선처럼 비치지 않게 한 줄 더 덮는다. */
+@media (max-width:940px){
+  .cine{min-height:calc(100vh - var(--nav-real, var(--nav-h)) + 1px);
+        min-height:calc(100dvh - var(--nav-real, var(--nav-h)) + 1px)}
+}
+
 </style>
 </head>
 <body>
@@ -5760,7 +5768,25 @@ window.IMG          = {"/src/assets/images/ama_healmar_cleanser.jpg":"data:image
     }, 420);
   }
 
+  /* 메뉴바 실제 높이를 CSS 에 알려 준다 (2026-10-28)
+     ⚠ 휴대폰에서는 메뉴바가 화면 위에 자리를 차지(sticky)하고, 히어로 높이를
+        「화면 높이 − 메뉴바 높이」로 정한다. 메뉴바 높이를 64px 로 고정해 두었는데
+        실제로는 기기·글꼴마다 63.5 / 64.5px … 로 달라, 맨 위로 올렸을 때
+        아래 B-Wave 가 얇게 삐져나와 보였다 → 실제 높이를 재서 --nav-real 로 넘긴다.
+     ⚠ 휴대폰 메뉴가 열려 있을 때는 메뉴바가 길어지므로 재지 않는다. */
+  function syncNavH() {
+    if (S.mobileMenu) return;
+    var n = document.querySelector('.nav');
+    if (!n) return;
+    var h = n.getBoundingClientRect().height;
+    if (h > 0 && h < 200) document.documentElement.style.setProperty('--nav-real', h + 'px');
+  }
+  window.addEventListener('resize', syncNavH);
+  window.addEventListener('orientationchange', syncNavH);
+  try { if (document.fonts && document.fonts.ready) document.fonts.ready.then(syncNavH); } catch (e) { }
+
   function wire() {
+    syncNavH();
     /* --- 이동 --- */
     click('[data-go]', function (b) { go(b.getAttribute('data-go')); });
     click('[data-lang]', function (b) { S.lang = b.getAttribute('data-lang'); render(); });
