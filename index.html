@@ -6,6 +6,12 @@
 <!-- 밝은 화면 전용 — 휴대폰 다크 모드가 색을 멋대로 바꾸지 않게 (흰 입력칸에 흰 글자 방지, 2026-10-06) -->
 <meta name="color-scheme" content="light only">
 <title>B-Beauty | K-뷰티 연합 플랫폼</title>
+<!-- 관리자 글쓰기 글꼴(명조·고딕)용 웹 글꼴 (2026-11-03)
+     ⚠ 예전에는 「명조」「고딕」을 골라도 기기에 그 글꼴이 없으면 똑같아 보였다.
+        글꼴 파일은 그 글꼴을 쓴 글자가 화면에 있을 때만 내려받으므로 평소 속도에는 영향이 거의 없다. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&family=Noto+Serif+KR:wght@400;700&display=swap">
 <!-- 네이버 서치어드바이저 소유 확인 (2026-09-14) — 지우면 등록이 풀린다 -->
 <meta name="naver-site-verification" content="c1603df26eb96a184372163957bbfc122965dd65" />
 
@@ -2735,6 +2741,48 @@ footer .fgrid>div:first-child .sns{margin-top:0;margin-left:0}
   .boardform .rtbar .cdot{width:30px;height:30px;min-width:30px}
   .boardform .rtbar #bf-img,.boardform .rtbar #bf-vid{order:4;flex:1 1 calc(50% - 4px)}
 }
+/* 관리자 글쓰기 — 정렬 단추 추가 (2026-11-03)
+   도구 순서: B I U | 왼쪽·가운데·오른쪽 정렬 | 글꼴 · 크기 | 색 | ≔ 사진 영상
+   휴대폰(640px 이하) 줄: 「B I U 정렬3 ≔」(7개를 한 줄에 고르게) / 「글꼴 · 크기」 / 「색」 / 「사진 · 영상」 */
+.rtbar .rtal{display:inline-flex;align-items:center;justify-content:center}
+.rtbar .rtal svg{display:block}
+@media (max-width:640px){
+  .boardform .rtbar{column-gap:6px}
+  .boardform .rtbar [data-rt]{flex:0 0 calc((100% - 36px) / 7);min-width:0;padding:0}
+}
+/* 이벤트 글쓰기 — 시작 일시 · 종료 일시 (2026-11-03)
+   각 칸 = 날짜 + 시각. PC·태블릿은 두 칸 나란히, 휴대폰(640px 이하)은 위아래로 */
+.formpanel .field2.evdates{grid-template-columns:minmax(0,1fr) minmax(0,1fr);max-width:760px}
+@media (max-width:640px){ .formpanel .field2.evdates{grid-template-columns:minmax(0,1fr);max-width:none;gap:14px} }
+.formpanel .dtpair{display:flex;gap:8px;min-width:0}
+.formpanel .dtpair input{min-width:0;width:auto}
+.formpanel .dtpair input[type=date]{flex:1.4 1 0}
+.formpanel .dtpair input[type=time]{flex:1 1 0}
+.formpanel .evdates + .pwhint{margin-top:-14px}
+/* =========================================================
+   글쓰기 — 사진·영상 덩어리(.rtm) 끌어서 옮기기 · 파일 끌어다 놓기 (2026-11-03)
+   ========================================================= */
+.rtm{margin:12px 0;border-radius:12px}
+.rtm img,.rtbody .rtm img,.richbody .rtm img{display:block;max-width:100%;height:auto;margin:0;border-radius:12px}
+.rtm.rtvideo{margin:12px 0}
+/* 글 칸 안 — 잡을 수 있다는 표시, 길게 누를 때 사진 메뉴·글자 선택이 뜨지 않게 */
+.rtbody .rtm{position:relative;cursor:grab;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;
+  transition:opacity .15s, box-shadow .15s, transform .15s}
+.rtbody .rtm:hover{box-shadow:0 0 0 2px rgba(0,140,170,.35)}
+.rtbody .rtm iframe,.rtbody .rtm video{pointer-events:none}   /* 글 칸에서는 재생 대신 잡아서 옮기기 */
+.rtbody .rtm.rtm-press{transform:scale(.98);box-shadow:0 0 0 3px rgba(0,140,170,.45)}
+.rtbody .rtm.rtm-drag{opacity:.3}
+.rtbody .rtm.rtm-loading{min-height:90px;background:repeating-linear-gradient(45deg,#eef7f9 0 10px,#e4f1f4 10px 20px)}
+.rtbody.rtdrop-over{background:#f4fbfd}
+html.rt-dragging,html.rt-dragging *{cursor:grabbing !important;user-select:none;-webkit-user-select:none}
+/* 끄는 동안 손가락(마우스)을 따라다니는 작은 사진 · 놓일 자리를 알려 주는 파란 선 */
+.rtghost{position:fixed;z-index:300;pointer-events:none;transform:translate(-50%,-50%) rotate(-2deg);
+  border-radius:10px;overflow:hidden;opacity:.9;box-shadow:0 12px 30px rgba(0,36,48,.35);background:#000}
+.rtghost img,.rtghost video,.rtghost iframe{display:block;width:100%;height:auto;margin:0;border-radius:0;aspect-ratio:auto}
+.rtghost iframe,.rtghost video{aspect-ratio:16/9;height:auto}
+.rtdropline{position:fixed;z-index:299;height:3px;border-radius:3px;background:var(--brand,#008caa);pointer-events:none;
+  box-shadow:0 0 0 3px rgba(0,140,170,.18)}
+.formpanel .rthint{margin-top:8px}
 
 </style>
 </head>
@@ -3149,7 +3197,17 @@ window.IMG          = {"/src/assets/images/ama_healmar_cleanser.jpg":"data:image
   function showToast(m) {
     S.toast = m;
     if (S.toastTimer) clearTimeout(S.toastTimer);
-    S.toastTimer = setTimeout(function () { S.toast = null; render(); }, 3500);
+    S.toastTimer = setTimeout(hideToast, 3500);
+  }
+  /* 알림을 닫는다 — 화면 전체를 다시 그리지 않고 알림만 뺀다 (2026-11-03)
+     ⚠ 예전에는 알림이 사라질 때(3.5초 뒤) 화면 전체를 다시 그려,
+        그사이 글쓰기 칸에 입력한 제목·날짜·글꼴 선택 등이 **처음 값으로 되돌아갔다.**
+        (관리자 모드를 켠 직후 「…작성」을 누르고 바로 쓰면 발생) */
+  function hideToast() {
+    S.toast = null;
+    if (S.toastTimer) { clearTimeout(S.toastTimer); S.toastTimer = null; }
+    var t = document.querySelector('.toast');
+    if (t && t.parentNode) t.parentNode.removeChild(t);
   }
 
   /* 제품 카드용 — 공식몰과 스마트스토어 버튼을 함께.
@@ -4064,14 +4122,313 @@ window.IMG          = {"/src/assets/images/ama_healmar_cleanser.jpg":"data:image
      EVENTS & NOTICES (CompassQuiz.tsx)
      ========================================================= */
   /* 커서 자리에 넣는다 */
-  function insertAtCursor(html) {
+  /* =========================================================
+     글쓰기 — 사진·영상 블록 (2026-11-03)
+     · 사진·영상은 한 덩어리(.rtm, 글자 편집 불가)로 글 칸의 맨 바깥 줄 사이에 놓는다.
+     · PC 는 끌어서, 휴대폰·태블릿은 **길게 누른 뒤 끌어서** 사진끼리 순서를 바꾸거나 글 위아래로 옮긴다.
+     · 사진·영상 파일을 글 칸에 끌어다 놓으면 놓은 자리에 들어간다.
+     · 사진·영상 단추로 넣으면 커서가 있던 줄 바로 아래에 들어간다.
+     ⚠ 예전에는 커서 자리(글줄 안)에 그대로 끼워 넣어 옮길 수 없었다.
+     ========================================================= */
+  var RT_MEDIA = 'img,video,iframe';
+  function rtIsBlock(n) { return n.nodeType === 1 && /^(DIV|P|UL|OL|H3|H4|BLOCKQUOTE)$/.test(n.tagName); }
+  function rtEmpty(n) { return !n.textContent.replace(/[\s​]/g, '') && !n.querySelector(RT_MEDIA + ',br'); }
+  /* 글 칸을 「줄(div) · 사진/영상(.rtm)」이 나란히 놓인 모양으로 정리한다 */
+  function rtNormalize(body) {
+    if (!body) return;
+    /* ① 맨 바깥에 흩어진 글자·<br> 을 줄(div)로 묶는다 */
+    var line = null;
+    Array.prototype.slice.call(body.childNodes).forEach(function (n) {
+      if (rtIsBlock(n)) { line = null; return; }
+      if (n.nodeType === 3 && !n.data.replace(/[\s​]/g, '') && !line) { body.removeChild(n); return; }
+      if (n.nodeType === 1 && n.tagName === 'BR') {
+        if (line) { body.removeChild(n); if (!line.childNodes.length) line.appendChild(document.createElement('br')); }
+        else { line = document.createElement('div'); body.insertBefore(line, n); line.appendChild(n); }
+        line = null; return;
+      }
+      if (!line) { line = document.createElement('div'); body.insertBefore(line, n); }
+      line.appendChild(n);
+    });
+    /* ② 줄 안에 끼어 있는 사진·영상은 꺼내서 그 줄 바로 아래 덩어리(.rtm)로 */
+    Array.prototype.slice.call(body.querySelectorAll(RT_MEDIA)).forEach(function (m) {
+      var unit = m.closest('.rtm') || m.closest('.rtvideo') || m;
+      if (unit.parentNode === body && unit.classList && unit.classList.contains('rtm')) return;
+      var top = unit; while (top.parentNode && top.parentNode !== body) top = top.parentNode;
+      var box = unit;
+      if (unit === m) {
+        box = document.createElement('div');
+        box.className = 'rtm' + (m.tagName === 'IMG' ? '' : ' rtvideo');
+      } else box.classList.add('rtm');
+      body.insertBefore(box, top === unit ? unit : top.nextSibling);
+      if (box !== unit) box.appendChild(unit);
+      if (top !== unit && top.parentNode === body && rtEmpty(top)) body.removeChild(top);
+    });
+    /* ③ 덩어리 표시 — 글자 편집 막기, 그림 자체 끌기(브라우저 기본) 막기 */
+    Array.prototype.forEach.call(body.querySelectorAll('.rtm'), function (x) {
+      x.setAttribute('contenteditable', 'false');
+      x.classList.remove('rtm-drag', 'rtm-press');
+      Array.prototype.forEach.call(x.querySelectorAll('img'), function (i) { i.setAttribute('draggable', 'false'); });
+    });
+    /* ④ 맨 끝이 사진이면 그 아래에 글을 쓸 수 있게 빈 줄 하나 */
+    var last = body.lastElementChild;
+    if (last && last.classList.contains('rtm')) {
+      var d = document.createElement('div'); d.appendChild(document.createElement('br')); body.appendChild(d);
+    }
+  }
+  /* 놓을 자리 — 손가락(마우스) 높이 y 에 가장 가까운 줄 사이. skip = 지금 옮기는 덩어리 */
+  function rtGap(body, y, skip) {
+    var kids = Array.prototype.filter.call(body.children, function (k) { return k !== skip; });
+    for (var i = 0; i < kids.length; i++) {
+      var r = kids[i].getBoundingClientRect();
+      if (y < r.top + r.height / 2) {
+        var prev = kids[i - 1];
+        return { before: kids[i], y: prev ? (prev.getBoundingClientRect().bottom + r.top) / 2 : r.top - 4 };
+      }
+    }
+    var lastK = kids[kids.length - 1];
+    return { before: null, y: lastK ? lastK.getBoundingClientRect().bottom + 4 : body.getBoundingClientRect().top + 16 };
+  }
+  function rtShowGap(body, y, skip, line) {
+    var g = rtGap(body, y, skip), br = body.getBoundingClientRect();
+    line.style.left = (br.left + 10) + 'px'; line.style.width = Math.max(0, br.width - 20) + 'px';
+    line.style.top = (g.y - 1.5) + 'px'; line.style.display = 'block';
+    return g;
+  }
+  /* 커서가 있던 줄 바로 아래 (커서가 없으면 맨 끝) */
+  function rtBeforeFromCaret(body) {
+    if (!rtRange || !body.contains(rtRange.startContainer)) return null;
+    var n = rtRange.startContainer;
+    if (n === body) return body.childNodes[rtRange.startOffset] || null;
+    while (n.parentNode && n.parentNode !== body) n = n.parentNode;
+    return n.parentNode === body ? n.nextSibling : null;
+  }
+  /* 맨 끝에 넣을 때 — 끝에 빈 줄이 있으면 그 앞에 (사진 사이사이에 빈 줄이 쌓이지 않게) */
+  function rtAt(body, before) {
+    if (before && before.parentNode === body) return before;
+    var lc = body.lastElementChild;
+    if (lc && !lc.classList.contains('rtm') && !lc.textContent.replace(/[\s\u200b]/g, '') && !lc.querySelector(RT_MEDIA)) return lc;
+    return null;
+  }
+  function rtBox(isVideo) {
+    var d = document.createElement('div');
+    d.className = 'rtm' + (isVideo ? ' rtvideo' : '') + ' rtm-loading';
+    d.setAttribute('contenteditable', 'false');
+    return d;
+  }
+  /* 사진 — 큰 사진은 1400px 로 줄인다 */
+  function rtReadImage(file, done) {
+    var rd = new FileReader();
+    rd.onload = function (ev) {
+      var img = new Image();
+      img.onload = function () {
+        var max = 1400, w = img.width, h = img.height;
+        if (w > max || h > max) { var r = Math.min(max / w, max / h); w = Math.round(w * r); h = Math.round(h * r); }
+        var cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+        cv.getContext('2d').drawImage(img, 0, 0, w, h);
+        done(cv.toDataURL('image/jpeg', 0.85));
+      };
+      img.onerror = function () { done(null); };
+      img.src = ev.target.result;
+    };
+    rd.onerror = function () { done(null); };
+    rd.readAsDataURL(file);
+  }
+  /* 영상 파일 크기 확인
+     ⚠ 서버를 연결했다면 한 번에 보낼 수 있는 크기가 4.5MB 로 제한된다.
+        글자로 바꿔 담으면 약 1.37배로 늘어나므로 파일은 3MB 아래여야 한다.
+        서버가 없으면 브라우저에만 담기므로 조금 더 허용한다. */
+  function rtVideoOk(file) {
+    var MB = file.size / 1024 / 1024;
+    var LIMIT = COMMUNITY_API ? 3 : 8;
+    if (MB <= LIMIT) return true;
+    alert(pick(
+      '영상이 너무 큽니다 (' + MB.toFixed(1) + 'MB).\n' + LIMIT + 'MB 이하로 줄이거나, 유튜브에 올린 뒤 주소를 넣어 주세요.',
+      'Video is too large (' + MB.toFixed(1) + 'MB).\nUse a file under ' + LIMIT + 'MB, or upload to YouTube and paste the link.',
+      '视频过大（' + MB.toFixed(1) + 'MB）。\n请使用 ' + LIMIT + 'MB 以下的文件，或上传到 YouTube 后粘贴链接。',
+      '動画が大きすぎます（' + MB.toFixed(1) + 'MB）。\n' + LIMIT + 'MB 以下のファイルにするか、YouTube にアップしてリンクをご利用ください。'));
+    return false;
+  }
+  /* 파일 여러 개를 before 앞에 차례대로 넣는다 (읽는 동안 자리를 먼저 잡아 순서가 섞이지 않게) */
+  function rtAddFiles(files, before) {
     var body = el('bf-body');
     if (!body) return;
-    body.focus();
-    try {
-      document.execCommand('insertHTML', false, html);
-    } catch (e) { body.innerHTML += html; }
+    files.forEach(function (file) {
+      var isImg = /^image\//.test(file.type), isVid = /^video\//.test(file.type);
+      if (!isImg && !isVid) return;
+      if (isVid && !rtVideoOk(file)) return;
+      var box = rtBox(isVid);
+      body.insertBefore(box, rtAt(body, before));
+      var fin = function (html) {
+        if (!html) { if (box.parentNode) box.parentNode.removeChild(box); }
+        else { box.innerHTML = html; box.classList.remove('rtm-loading'); }
+        var b2 = el('bf-body'); if (b2 && b2.contains(box)) rtNormalize(b2);
+        syncBoardForm();
+      };
+      if (isImg) rtReadImage(file, function (url) { fin(url ? '<img src="' + url + '" alt="" draggable="false">' : null); });
+      else {
+        var rd = new FileReader();
+        rd.onload = function (ev) { fin('<video src="' + ev.target.result + '" controls playsinline></video>'); };
+        rd.onerror = function () { fin(null); };
+        rd.readAsDataURL(file);
+      }
+    });
+    rtNormalize(body);
     syncBoardForm();
+  }
+  /* 유튜브 등 바로 만들 수 있는 덩어리를 before 앞에 */
+  function rtAddHtml(html, isVideo, before) {
+    var body = el('bf-body');
+    if (!body) return;
+    var box = rtBox(isVideo); box.classList.remove('rtm-loading'); box.innerHTML = html;
+    body.insertBefore(box, rtAt(body, before));
+    rtNormalize(body);
+    syncBoardForm();
+  }
+
+  /* ── 끌어서 옮기기 ── */
+  var rtDrag = null;
+  function rtDragStart(box, x, y) {
+    var body = el('bf-body');
+    if (!body || !body.contains(box)) return;
+    var r = box.getBoundingClientRect();
+    var ghost = box.cloneNode(true);
+    ghost.className = 'rtghost'; ghost.removeAttribute('contenteditable');
+    ghost.style.width = Math.min(160, Math.max(80, r.width * 0.5)) + 'px';
+    document.body.appendChild(ghost);
+    var line = document.createElement('div'); line.className = 'rtdropline'; document.body.appendChild(line);
+    box.classList.add('rtm-drag');
+    document.documentElement.classList.add('rt-dragging');
+    rtDrag = { box: box, body: body, ghost: ghost, line: line, x: x, y: y, raf: 0 };
+    try { if (navigator.vibrate) navigator.vibrate(15); } catch (e) { }
+    rtDragMove(x, y);
+    rtDrag.raf = requestAnimationFrame(rtAutoScroll);
+  }
+  function rtDragMove(x, y) {
+    if (!rtDrag) return;
+    rtDrag.x = x; rtDrag.y = y;
+    rtDrag.ghost.style.left = x + 'px'; rtDrag.ghost.style.top = y + 'px';
+    rtShowGap(rtDrag.body, y, rtDrag.box, rtDrag.line);
+  }
+  /* 화면 위·아래 가장자리로 끌면 저절로 스크롤 */
+  function rtAutoScroll() {
+    if (!rtDrag) return;
+    var y = rtDrag.y, h = window.innerHeight, edge = 80, v = 0;
+    /* 위쪽은 메뉴바 아래부터 잰다 (메뉴바가 화면 위를 덮고 있으므로) */
+    var nav = document.querySelector('.nav'), topEdge = (nav ? Math.max(0, nav.getBoundingClientRect().bottom) : 0) + edge;
+    if (y < topEdge) v = -Math.ceil((topEdge - y) / 5);
+    else if (y > h - edge) v = Math.ceil((y - (h - edge)) / 5);
+    if (v) {
+      try { window.scrollBy({ top: v, behavior: 'instant' }); } catch (e) { window.scrollBy(0, v); }
+      rtShowGap(rtDrag.body, y, rtDrag.box, rtDrag.line);
+    }
+    rtDrag.raf = requestAnimationFrame(rtAutoScroll);
+  }
+  function rtDragEnd(drop) {
+    if (!rtDrag) return;
+    var d = rtDrag; rtDrag = null;
+    cancelAnimationFrame(d.raf);
+    if (drop && d.body.isConnected) {
+      var g = rtGap(d.body, d.y, d.box);
+      if (g.before !== d.box) d.body.insertBefore(d.box, g.before);
+      rtNormalize(d.body);
+      syncBoardForm();
+    }
+    d.box.classList.remove('rtm-drag');
+    if (d.ghost.parentNode) d.ghost.parentNode.removeChild(d.ghost);
+    if (d.line.parentNode) d.line.parentNode.removeChild(d.line);
+    document.documentElement.classList.remove('rt-dragging');
+  }
+  /* 글쓰기 중에 파일을 글 칸 밖에 떨어뜨려도 브라우저가 그 파일을 열어 버리지 않게 */
+  ['dragover', 'drop'].forEach(function (t) {
+    document.addEventListener(t, function (e) {
+      if (!S.boardForm) return;
+      var ty = e.dataTransfer && e.dataTransfer.types;
+      if (ty && Array.prototype.indexOf.call(ty, 'Files') >= 0) e.preventDefault();
+    });
+  });
+  document.addEventListener('keydown', function (e) { if (rtDrag && e.key === 'Escape') rtDragEnd(false); });
+
+  /* 사진·영상 블록 끌기와 파일 놓기를 글 칸에 연결한다 (화면을 그릴 때마다) */
+  function wireRtMedia() {
+    var body = el('bf-body');
+    if (!body) return;
+    rtNormalize(body);
+    var boxOf = function (t) { var b = t && t.closest ? t.closest('.rtm') : null; return b && body.contains(b) ? b : null; };
+
+    /* PC — 누른 채 6px 이상 움직이면 끌기 시작 */
+    body.addEventListener('mousedown', function (e) {
+      var box = boxOf(e.target);
+      if (!box || e.button !== 0) return;
+      e.preventDefault();
+      var sx = e.clientX, sy = e.clientY, started = false;
+      var mm = function (ev) {
+        if (!started && Math.abs(ev.clientX - sx) + Math.abs(ev.clientY - sy) > 6) { started = true; rtDragStart(box, ev.clientX, ev.clientY); }
+        if (started) rtDragMove(ev.clientX, ev.clientY);
+      };
+      var mu = function () {
+        document.removeEventListener('mousemove', mm);
+        document.removeEventListener('mouseup', mu);
+        if (started) rtDragEnd(true);
+      };
+      document.addEventListener('mousemove', mm);
+      document.addEventListener('mouseup', mu);
+    });
+
+    /* 휴대폰·태블릿 — 0.45초 길게 누르면 끌기 시작. 그 전에 손가락이 움직이면 그냥 스크롤 */
+    body.addEventListener('touchstart', function (e) {
+      var box = boxOf(e.target);
+      if (!box || e.touches.length !== 1) return;
+      var t0 = e.touches[0], sx = t0.clientX, sy = t0.clientY, lx = sx, ly = sy;
+      box.classList.add('rtm-press');
+      var timer = setTimeout(function () { timer = null; box.classList.remove('rtm-press'); rtDragStart(box, lx, ly); }, 450);
+      var tm = function (ev) {
+        var p = ev.touches[0]; if (!p) return;
+        lx = p.clientX; ly = p.clientY;
+        if (rtDrag) { if (ev.cancelable) ev.preventDefault(); rtDragMove(lx, ly); return; }
+        if (timer && Math.abs(lx - sx) + Math.abs(ly - sy) > 10) { clearTimeout(timer); timer = null; done(false); }
+      };
+      var te = function (ev) { if (timer) { clearTimeout(timer); timer = null; } done(ev.type === 'touchend'); };
+      var done = function (drop) {
+        box.classList.remove('rtm-press');
+        document.removeEventListener('touchmove', tm, { passive: false });
+        document.removeEventListener('touchend', te);
+        document.removeEventListener('touchcancel', te);
+        if (rtDrag) rtDragEnd(drop);
+      };
+      document.addEventListener('touchmove', tm, { passive: false });
+      document.addEventListener('touchend', te);
+      document.addEventListener('touchcancel', te);
+    }, { passive: true });
+    /* 길게 누를 때 뜨는 사진 저장 메뉴·브라우저 기본 끌기는 막는다 */
+    body.addEventListener('contextmenu', function (e) { if (boxOf(e.target)) e.preventDefault(); });
+    body.addEventListener('dragstart', function (e) { if (boxOf(e.target)) e.preventDefault(); });
+
+    /* 파일 끌어다 놓기 — 도구 막대·글 칸 어디에 놓아도 된다. 놓을 자리는 파란 선으로 보여 준다 */
+    var zone = body.parentNode, dropLine = null;
+    var hasFiles = function (e) { var ty = e.dataTransfer && e.dataTransfer.types; return !!ty && Array.prototype.indexOf.call(ty, 'Files') >= 0; };
+    var hide = function () {
+      body.classList.remove('rtdrop-over');
+      if (dropLine && dropLine.parentNode) dropLine.parentNode.removeChild(dropLine);
+      dropLine = null;
+    };
+    zone.addEventListener('dragenter', function (e) { if (hasFiles(e)) rtNormalize(body); });
+    zone.addEventListener('dragover', function (e) {
+      if (!hasFiles(e)) return;
+      e.preventDefault();
+      try { e.dataTransfer.dropEffect = 'copy'; } catch (x) { }
+      if (!dropLine) { dropLine = document.createElement('div'); dropLine.className = 'rtdropline'; document.body.appendChild(dropLine); }
+      body.classList.add('rtdrop-over');
+      rtShowGap(body, e.clientY, null, dropLine);
+    });
+    zone.addEventListener('dragleave', function (e) { if (!zone.contains(e.relatedTarget)) hide(); });
+    zone.addEventListener('drop', function (e) {
+      if (!hasFiles(e)) return;
+      e.preventDefault();
+      hide();
+      rtNormalize(body);
+      var g = rtGap(body, e.clientY, null);
+      rtAddFiles(Array.prototype.slice.call(e.dataTransfer.files || []), g.before);
+    });
   }
 
   function syncBoardForm() {
@@ -4080,7 +4437,10 @@ window.IMG          = {"/src/assets/images/ama_healmar_cleanser.jpg":"data:image
     var f = S.boardForm, v;
     if ((v = g('bf-title')) !== null) f.title = v;
     if ((v = g('bf-desc')) !== null) f.desc = v;
+    if ((v = g('bf-starts')) !== null) f.startsAt = v;
     if ((v = g('bf-ends')) !== null) f.endsAt = v;
+    if ((v = g('bf-starts-t')) !== null) f.startTime = v;
+    if ((v = g('bf-ends-t')) !== null) f.endTime = v;
     var b = el('bf-body');
     if (b) f.content = b.innerHTML;
   }
@@ -4099,7 +4459,7 @@ window.IMG          = {"/src/assets/images/ama_healmar_cleanser.jpg":"data:image
             var keep = (n === 'src' || n === 'href' || n === 'alt' || n === 'color' ||
                         n === 'face' || n === 'size' || n === 'controls' ||
                         n === 'allowfullscreen' || n === 'playsinline' || n === 'loading' ||
-                        n === 'class' || n === 'target' || n === 'rel' ||
+                        n === 'class' || n === 'target' || n === 'rel' || n === 'align' ||
                         (n === 'style' && !/expression|javascript:/i.test(a.value)));
             if (!keep || /^on/i.test(n)) c.removeAttribute(a.name);
           });
@@ -4129,7 +4489,27 @@ window.IMG          = {"/src/assets/images/ama_healmar_cleanser.jpg":"data:image
 
     var now = nowStamp();
     var item;
+    /* 고쳐 쓸 때는 처음 올린 시각·날짜를 그대로 둔다 (2026-11-03)
+       ⚠ 예전에는 고칠 때마다 올린 날짜가 「고친 날」로 바뀌었다 — 이벤트·공지 모두 */
+    var prev = null;
+    if (f.editing) {
+      prev = (f.kind === 'event' ? S.board.events : S.board.notices)
+        .filter(function (x) { return x.id === f.editing; })[0] || null;
+    }
+    var postedAt = (prev && prev.at) || now;
+    var postedDate = (prev && prev.date) || now.slice(0, 10);
     if (f.kind === 'event') {
+      /* 시작일 — 관리자가 고른다. 비워 두면 올린 날 (2026-11-03, 예전에는 늘 올린 날이었다) */
+      var startDay = f.startsAt || postedDate;
+      /* 시각 (2026-11-03) — 비워 두면 시작은 그날 0시, 종료는 그날 23:59 로 본다 */
+      var startTime = f.startTime || '', endTime = f.endsAt ? (f.endTime || '') : '';
+      if (f.endsAt && (f.endsAt + 'T' + (endTime || '23:59')) < (startDay + 'T' + (startTime || '00:00'))) {
+        alert(pick('종료 일시가 시작 일시보다 빠릅니다. 날짜와 시각을 확인해 주세요.',
+          'The end is before the start. Please check the dates and times.',
+          '结束时间早于开始时间，请检查日期和时间。',
+          '終了日時が開始日時より前です。日付と時刻をご確認ください。'));
+        return;
+      }
       var evId = f.editing || ('ev-' + Date.now());
       /* 카드를 누르면 상세가 열리도록 `detail:` 로 이어 준다 */
       var firstImg = (String(f.content).match(/<img[^>]+src="([^"]+)"/) || [])[1];
@@ -4140,10 +4520,12 @@ window.IMG          = {"/src/assets/images/ama_healmar_cleanser.jpg":"data:image
         cat: f.category || '이벤트',
         title: f.title, desc: f.desc || plain.trim().slice(0, 90),
         img: firstImg || '/src/assets/images/ocean_cosmetics_hero_1784622126081.jpg',
-        period: f.endsAt ? (now.slice(0, 10) + ' ~ ' + f.endsAt) : now.slice(0, 10),
-        html: f.content, endsAt: f.endsAt || null, at: now,
-        date: now.slice(0, 10)
+        period: evPeriod(startDay, startTime, f.endsAt, endTime),
+        html: f.content, startsAt: startDay, startTime: startTime || null,
+        endsAt: f.endsAt || null, endTime: endTime || null, at: postedAt,
+        date: postedDate
       };
+      if (prev && prev.at && prev.at !== now) item.editedAt = now;
       var evs = S.board.events;
       var i = evs.findIndex(function (x) { return x.id === item.id; });
       if (i >= 0) evs[i] = item; else evs.unshift(item);
@@ -4152,8 +4534,9 @@ window.IMG          = {"/src/assets/images/ama_healmar_cleanser.jpg":"data:image
         id: f.editing || ('nt-' + Date.now()),
         category: f.category || '공지',
         title: f.title, content: plain.trim(), html: f.content,
-        at: now, date: now.slice(0, 10), important: false
+        at: postedAt, date: postedDate, important: false
       };
+      if (prev) item.editedAt = now;
       var nts = S.board.notices;
       var j = nts.findIndex(function (x) { return x.id === item.id; });
       if (j >= 0) nts[j] = item; else nts.unshift(item);
@@ -4193,10 +4576,38 @@ window.IMG          = {"/src/assets/images/ama_healmar_cleanser.jpg":"data:image
   var FONTS = [
     { id: '', kr: '기본 글꼴', en: 'Default' },
     { id: "'Noto Serif KR',serif", kr: '명조', en: 'Serif' },
-    { id: "'Pretendard',sans-serif", kr: '고딕', en: 'Sans' },
+    { id: "'Pretendard','Noto Sans KR',sans-serif", kr: '고딕', en: 'Sans' },   /* Noto Sans KR 은 웹 글꼴로 불러온다 (build.py) */
     { id: 'monospace', kr: '고정폭', en: 'Mono' }
   ];
   var COLORS = ['#0b3b47', '#008caa', '#b3261e', '#c2891b', '#2e7d32', '#6a1b9a', '#455a64', '#ffffff'];
+  /* 정렬 단추 그림 — 가로줄 네 개 (l 왼쪽 · c 가운데 · r 오른쪽) */
+  function alignIcon(k) {
+    var rows = [[2, 14], [2, 10], [2, 14], [2, 8]];
+    var x = function (w) { return k === 'l' ? 2 : k === 'r' ? 16 - w : (18 - w) / 2; };
+    return '<svg width="18" height="14" viewBox="0 0 18 14" aria-hidden="true">' + rows.map(function (r, i) {
+      var w = r[1]; return '<rect x="' + x(w) + '" y="' + (i * 4) + '" width="' + w + '" height="2" rx="1" fill="currentColor"/>';
+    }).join('') + '</svg>';
+  }
+  /* 글 쓰는 칸의 마지막 선택(커서) 위치를 기억한다 (2026-11-03)
+     ⚠ 글꼴·크기 선택칸을 열면 초점이 선택칸으로 옮겨가 글 칸의 선택이 풀린다.
+        예전에는 이를 막으려고 선택칸을 누르는 동작 자체를 막아(preventDefault) **선택칸이 아예 열리지 않았다.**
+     → 선택칸은 정상적으로 열리게 두고, 고른 뒤 기억해 둔 선택을 되살려 적용한다. */
+  var rtRange = null;
+  document.addEventListener('selectionchange', function () {
+    var body = document.getElementById('bf-body');
+    var sel = window.getSelection && window.getSelection();
+    if (!body || !sel || !sel.rangeCount) return;
+    var r = sel.getRangeAt(0);
+    if (body.contains(r.commonAncestorContainer)) rtRange = r.cloneRange();
+  });
+  function rtRestore() {
+    var body = document.getElementById('bf-body');
+    if (!body) return;
+    body.focus();
+    if (rtRange && body.contains(rtRange.commonAncestorContainer)) {
+      try { var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(rtRange); } catch (e) { }
+    }
+  }
 
   function boardEditor() {
     var f = S.boardForm;
@@ -4220,11 +4631,21 @@ window.IMG          = {"/src/assets/images/ama_healmar_cleanser.jpg":"data:image
       '<input id="bf-title" value="' + esc(f.title || '') + '" placeholder="' +
       L('제목을 입력하세요', 'Enter a title', '请输入标题', 'タイトルを入力') + '"></div>' +
 
-      (isEv ? '<div class="field2">' +
-        '<div class="field"><label>' + L('한 줄 소개', 'Summary', '简介', '概要') + '</label>' +
+      (isEv ? '<div class="field"><label>' + L('한 줄 소개', 'Summary', '简介', '概要') + '</label>' +
         '<input id="bf-desc" value="' + esc(f.desc || '') + '"></div>' +
-        '<div class="field"><label>' + L('종료일', 'Ends on', '结束日期', '終了日') + '</label>' +
-        '<input id="bf-ends" type="date" value="' + esc(f.endsAt || '') + '"></div></div>' : '') +
+        /* 이벤트 기간 — 시작일도 고를 수 있다 (2026-11-03. 예전에는 시작일이 늘 올린 날이었다) */
+        /* 시각도 고를 수 있다 (2026-11-03) — 비워 두면 시작 0시 · 종료 23:59 */
+        '<div class="field2 evdates">' +
+        '<div class="field"><label>' + L('시작 일시', 'Starts', '开始时间', '開始日時') + '</label>' +
+        '<div class="dtpair"><input id="bf-starts" type="date" value="' + esc(f.startsAt || '') + '">' +
+        '<input id="bf-starts-t" type="time" value="' + esc(f.startTime || '') + '" aria-label="' + L('시작 시각', 'Start time', '开始时刻', '開始時刻') + '"></div></div>' +
+        '<div class="field"><label>' + L('종료 일시', 'Ends', '结束时间', '終了日時') + '</label>' +
+        '<div class="dtpair"><input id="bf-ends" type="date" value="' + esc(f.endsAt || '') + '">' +
+        '<input id="bf-ends-t" type="time" value="' + esc(f.endTime || '') + '" aria-label="' + L('종료 시각', 'End time', '结束时刻', '終了時刻') + '"></div></div></div>' +
+        '<p class="pwhint">' + L('시각을 비워 두면 시작은 0시, 종료는 그날 23:59 까지입니다.',
+          'Leave the time empty to start at 00:00 and end at 23:59.',
+          '时间留空时，开始为 0:00，结束为当天 23:59。',
+          '時刻が空欄の場合、開始は 0:00、終了はその日の 23:59 です。') + '</p>' : '') +
 
       /* ── 꾸미기 도구 ── */
       '<div class="field"><label>' + L('내용', 'Content', '内容', '本文') + '</label>' +
@@ -4232,6 +4653,11 @@ window.IMG          = {"/src/assets/images/ama_healmar_cleanser.jpg":"data:image
       '<button data-rt="bold" title="' + L('굵게', 'Bold', '加粗', '太字') + '"><b>B</b></button>' +
       '<button data-rt="italic" title="' + L('기울임', 'Italic', '斜体', '斜体') + '"><i>I</i></button>' +
       '<button data-rt="underline" title="' + L('밑줄', 'Underline', '下划线', '下線') + '"><u>U</u></button>' +
+      '<span class="sep"></span>' +
+      /* 문단 정렬 (2026-11-03) — 왼쪽 · 가운데 · 오른쪽 */
+      '<button class="rtal" data-rt="justifyLeft" title="' + L('왼쪽 정렬', 'Align left', '左对齐', '左揃え') + '" aria-label="' + L('왼쪽 정렬', 'Align left', '左对齐', '左揃え') + '">' + alignIcon('l') + '</button>' +
+      '<button class="rtal" data-rt="justifyCenter" title="' + L('가운데 정렬', 'Align center', '居中', '中央揃え') + '" aria-label="' + L('가운데 정렬', 'Align center', '居中', '中央揃え') + '">' + alignIcon('c') + '</button>' +
+      '<button class="rtal" data-rt="justifyRight" title="' + L('오른쪽 정렬', 'Align right', '右对齐', '右揃え') + '" aria-label="' + L('오른쪽 정렬', 'Align right', '右对齐', '右揃え') + '">' + alignIcon('r') + '</button>' +
       '<span class="sep"></span>' +
       '<select id="bf-font" title="' + L('글꼴', 'Font', '字体', 'フォント') + '">' +
       FONTS.map(function (x) {
@@ -4256,6 +4682,10 @@ window.IMG          = {"/src/assets/images/ama_healmar_cleanser.jpg":"data:image
       '<button id="bf-vid">' + L('영상', 'Video', '视频', '動画') + '</button>' +
       '</div>' +
       '<div id="bf-body" class="rtbody" contenteditable="true">' + (f.content || '') + '</div>' +
+      '<p class="pwhint rthint">' + L('사진·영상은 끌어서 자리를 옮길 수 있습니다 (휴대폰·태블릿은 길게 누른 뒤 끌기). 파일을 글 칸에 끌어다 놓아도 들어갑니다.',
+        'Drag photos and videos to move them (on phones and tablets, press and hold, then drag). You can also drop files into the editor.',
+        '图片和视频可拖动调整位置（手机和平板请长按后拖动）。也可以把文件直接拖入编辑区。',
+        '写真・動画はドラッグで移動できます（スマホ・タブレットは長押ししてからドラッグ）。ファイルを本文欄にドロップしても追加できます。') + '</p>' +
       '<input type="file" id="bf-imgfile" accept="image/*" multiple hidden>' +
       '<input type="file" id="bf-vidfile" accept="video/*" hidden></div>' +
 
@@ -4294,7 +4724,9 @@ window.IMG          = {"/src/assets/images/ama_healmar_cleanser.jpg":"data:image
         esc(mine.title) + '</h3>' +
         '<div style="width:40px;height:1px;background:var(--brand);margin-top:12px"></div>' +
         '<p class="evstamp">' + esc(stampText(mine)) +
-        (mine.endsAt ? ' · ' + esc(pick('종료 ', 'Ends ', '结束 ', '終了 ')) + esc(mine.endsAt) : '') +
+        /* 시작일을 고를 수 있게 되어(2026-11-03) 「기간 시작 ~ 종료」로 보여 준다. 예전 글은 「종료 날짜」 그대로 */
+        (mine.startsAt ? ' · ' + esc(pick('기간 ', 'Period ', '期间 ', '期間 ')) + esc(evPeriod(mine.startsAt, mine.startTime, mine.endsAt, mine.endTime, true))
+          : (mine.endsAt ? ' · ' + esc(pick('종료 ', 'Ends ', '结束 ', '終了 ')) + esc(mine.endsAt) : '')) +
         '</p></div>' +
         '<div class="richbody">' + safeHtml(mine.html || '') + '</div>' +
         (S.admin ? '<div class="acts2">' +
@@ -4391,10 +4823,19 @@ window.IMG          = {"/src/assets/images/ama_healmar_cleanser.jpg":"data:image
      대표가 종료되면 자동으로 아래 목록으로 내려간다. */
   var EV_FEATURE_MAX = 3;
 
+  /* 이벤트 기간 글자 — 「2026-11-20 10:00 ~ 2026-11-30 18:00」. 시각을 안 정했으면 날짜만.
+     tail: 종료일이 없을 때 「시작 ~」 처럼 물결을 붙인다 (상세 화면용) */
+  function evPeriod(sd, st, ed, et, tail) {
+    var a = sd + (st ? ' ' + st : '');
+    if (!ed) return tail ? a + ' ~' : a;
+    return a + ' ~ ' + ed + (et ? ' ' + et : '');
+  }
+
   function evExpired(e) {
     if (!e.endsAt) return false;
     var today = new Date();
-    var t = new Date(e.endsAt + 'T23:59:59');
+    /* 종료 시각을 정했으면 그 시각까지 (2026-11-03) */
+    var t = new Date(e.endsAt + 'T' + (e.endTime ? e.endTime + ':59' : '23:59:59'));
     return t.getTime() < today.getTime();
   }
   function featuredEvents() {
@@ -4566,7 +5007,7 @@ window.IMG          = {"/src/assets/images/ama_healmar_cleanser.jpg":"data:image
           return '';
         })() +
         (list.length ? '<div class="notices">' + list.map(function (n) {
-          var open = S.noticeOpen === n.id;
+          var open = S.noticeOpen !== null && String(S.noticeOpen) === String(n.id);
           /* 분류 라벨은 NOTICE_CATS 의 3개 언어 표기를 쓴다 (번역본에 값이 없어도 안전) */
           var cd = NOTICE_CATS.filter(function (c) {
             return c.kr === n.category || c.code === n.category || c.code === n.categoryEn;
@@ -5987,7 +6428,7 @@ window.IMG          = {"/src/assets/images/ama_healmar_cleanser.jpg":"data:image
     click('[data-newboard]', function (b) {
       if (!S.admin) return;
       var kind = b.getAttribute('data-newboard');
-      S.boardForm = { kind: kind, title: '', desc: '', endsAt: '', content: '',
+      S.boardForm = { kind: kind, title: '', desc: '', startsAt: kind === 'event' ? nowStamp().slice(0, 10) : '', endsAt: '', content: '',
                       category: kind === 'event' ? '이벤트' : '공지', editing: null };
       window.scrollTo({ top: 0, behavior: 'smooth' });
       render();
@@ -6011,8 +6452,7 @@ window.IMG          = {"/src/assets/images/ama_healmar_cleanser.jpg":"data:image
     };
     keepSel('[data-rt]');
     keepSel('[data-rtcolor]');
-    keepSel('#bf-font');
-    keepSel('#bf-size');
+    /* ⚠ 글꼴·크기 선택칸에는 keepSel 을 쓰지 않는다 — 누르는 동작을 막으면 선택칸이 열리지 않는다 (2026-11-03) */
 
     click('[data-rt]', function (b) {
       var cmd = b.getAttribute('data-rt');
@@ -6029,40 +6469,26 @@ window.IMG          = {"/src/assets/images/ama_healmar_cleanser.jpg":"data:image
     });
     var bfFont = el('bf-font');
     if (bfFont) bfFont.addEventListener('change', function () {
-      var body = el('bf-body');
-      if (body) body.focus();
+      rtRestore();
       try { document.execCommand('fontName', false, bfFont.value || 'inherit'); } catch (e) { }
       syncBoardForm();
     });
     var bfSize = el('bf-size');
     if (bfSize) bfSize.addEventListener('change', function () {
-      var body = el('bf-body');
-      if (body) body.focus();
+      rtRestore();
       try { document.execCommand('fontSize', false, bfSize.value); } catch (e) { }
       syncBoardForm();
     });
 
-    /* 사진 넣기 — 큰 사진은 줄여서 넣는다 */
+    /* 사진·영상 넣기 — 커서가 있던 줄 바로 아래에 덩어리로 (2026-11-03, rtAddFiles) */
     var bi = el('bf-img'), bif = el('bf-imgfile');
     if (bi && bif) bi.addEventListener('click', function (e) { e.preventDefault(); bif.click(); });
     if (bif) bif.addEventListener('change', function () {
-      var files = Array.prototype.slice.call(bif.files || []);
-      files.forEach(function (file) {
-        if (!/^image\//.test(file.type)) return;
-        var rd = new FileReader();
-        rd.onload = function (ev) {
-          var img = new Image();
-          img.onload = function () {
-            var max = 1400, w = img.width, h = img.height;
-            if (w > max || h > max) { var r = Math.min(max / w, max / h); w = Math.round(w * r); h = Math.round(h * r); }
-            var cv = document.createElement('canvas'); cv.width = w; cv.height = h;
-            cv.getContext('2d').drawImage(img, 0, 0, w, h);
-            insertAtCursor('<img src="' + cv.toDataURL('image/jpeg', 0.85) + '" alt="">');
-          };
-          img.src = ev.target.result;
-        };
-        rd.readAsDataURL(file);
-      });
+      var body = el('bf-body');
+      if (!body) return;
+      rtNormalize(body);
+      rtAddFiles(Array.prototype.slice.call(bif.files || []), rtBeforeFromCaret(body));
+      bif.value = '';
     });
 
     /* 영상 넣기 — 파일 또는 유튜브 주소 */
@@ -6077,10 +6503,10 @@ window.IMG          = {"/src/assets/images/ama_healmar_cleanser.jpg":"data:image
       if (url === null) return;
       url = url.trim();
       if (url) {
-        var id = (url.match(/(?:v=|youtu\.be\/|embed\/)([\w-]{11})/) || [])[1];
+        var id = (url.match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([\w-]{11})/) || [])[1];
         if (id) {
-          insertAtCursor('<div class="rtvideo"><iframe src="https://www.youtube.com/embed/' + id +
-            '" allowfullscreen loading="lazy"></iframe></div>');
+          var body = el('bf-body');
+          if (body) { rtNormalize(body); rtAddHtml('<iframe src="https://www.youtube.com/embed/' + id + '" allowfullscreen loading="lazy"></iframe>', true, rtBeforeFromCaret(body)); }
         } else {
           alert(pick('유튜브 주소를 알아보지 못했습니다.', 'Could not read the YouTube link.',
             '无法识别该 YouTube 链接。', 'YouTube のリンクを認識できませんでした。'));
@@ -6090,27 +6516,13 @@ window.IMG          = {"/src/assets/images/ama_healmar_cleanser.jpg":"data:image
       bvf.click();
     });
     if (bvf) bvf.addEventListener('change', function () {
-      var file = (bvf.files || [])[0];
-      if (!file) return;
-      /* ⚠ 서버를 연결했다면 한 번에 보낼 수 있는 크기가 4.5MB 로 제한된다.
-         글자로 바꿔 담으면 약 1.37배로 늘어나므로 파일은 3MB 아래여야 한다.
-         서버가 없으면 브라우저에만 담기므로 조금 더 허용한다. */
-      var MB = file.size / 1024 / 1024;
-      var LIMIT = COMMUNITY_API ? 3 : 8;
-      if (MB > LIMIT) {
-        alert(pick(
-          '영상이 너무 큽니다 (' + MB.toFixed(1) + 'MB).\n' + LIMIT + 'MB 이하로 줄이거나, 유튜브에 올린 뒤 주소를 넣어 주세요.',
-          'Video is too large (' + MB.toFixed(1) + 'MB).\nUse a file under ' + LIMIT + 'MB, or upload to YouTube and paste the link.',
-          '视频过大（' + MB.toFixed(1) + 'MB）。\n请使用 ' + LIMIT + 'MB 以下的文件，或上传到 YouTube 后粘贴链接。',
-          '動画が大きすぎます（' + MB.toFixed(1) + 'MB）。\n' + LIMIT + 'MB 以下のファイルにするか、YouTube にアップしてリンクをご利用ください。'));
-        return;
-      }
-      var rd = new FileReader();
-      rd.onload = function (ev) {
-        insertAtCursor('<div class="rtvideo"><video src="' + ev.target.result + '" controls playsinline></video></div>');
-      };
-      rd.readAsDataURL(file);
+      var body = el('bf-body');
+      if (!body) return;
+      rtNormalize(body);
+      rtAddFiles(Array.prototype.slice.call(bvf.files || []).slice(0, 1), rtBeforeFromCaret(body));
+      bvf.value = '';
     });
+    wireRtMedia();
 
     var bfC = el('bf-cancel');
     if (bfC) bfC.addEventListener('click', function () { S.boardForm = null; render(); });
@@ -6126,6 +6538,9 @@ window.IMG          = {"/src/assets/images/ama_healmar_cleanser.jpg":"data:image
       if (!it) return;
       S.boardForm = {
         kind: pr[0], title: it.title, desc: it.desc || '', endsAt: it.endsAt || '',
+        startTime: it.startTime || '', endTime: it.endTime || '',
+        /* 시작일 — 예전 글은 startsAt 이 없어 기간(period) 앞쪽 날짜 → 올린 날 순으로 */
+        startsAt: it.startsAt || (String(it.period || '').match(/^\d{4}-\d{2}-\d{2}/) || [])[0] || it.date || '',
         content: it.html || '', category: it.cat || it.category || '', editing: it.id
       };
       S.evDetail = null;
@@ -6424,7 +6839,7 @@ window.IMG          = {"/src/assets/images/ama_healmar_cleanser.jpg":"data:image
     });
 
     /* --- 토스트 --- */
-    var tx = el('close-toast'); if (tx) tx.addEventListener('click', function () { S.toast = null; render(); });
+    var tx = el('close-toast'); if (tx) tx.addEventListener('click', hideToast);
 
     /* --- 이벤트 / 공지 --- */
     click('[data-evtab]', function (b) {
@@ -6472,8 +6887,10 @@ window.IMG          = {"/src/assets/images/ama_healmar_cleanser.jpg":"data:image
       S.noticeCat = b.getAttribute('data-ncat'); S.noticeOpen = null; render();
     });
     click('[data-notice]', function (b) {
-      var id = parseInt(b.getAttribute('data-notice'), 10);
-      S.noticeOpen = S.noticeOpen === id ? null : id; render();
+      /* ⚠ 관리자가 올린 공지의 id 는 「nt-숫자」라 parseInt 하면 NaN 이 되어 **열리지 않았다**
+            (내용·수정·삭제 단추를 볼 수 없었음) → 글자 그대로 비교한다 (2026-11-03) */
+      var id = b.getAttribute('data-notice');
+      S.noticeOpen = String(S.noticeOpen) === id ? null : id; render();
     });
     debounced('notice-q', function (v) { S.noticeQ = v; S.noticeOpen = null; });
 
