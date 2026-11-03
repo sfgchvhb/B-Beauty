@@ -4965,7 +4965,8 @@ window.IMG          = {"/src/assets/images/ama_healmar_cleanser.jpg":"data:image
     var tabs = '<div class="tabwrap"><div class="tabs' + (S.evTab === 'notices' ? ' b' : '') + '">' +
       '<button class="tab' + (S.evTab === 'events' ? ' on' : '') + '" data-evtab="events">' + giftIcon() +
       esc(pick('진행중인 이벤트', 'Active Events', '进行中活动', '開催中のイベント')) +
-      '<span class="tc">' + evs.length + '</span></button>' +
+      /* 탭 숫자 = 아직 끝나지 않은 이벤트만 (2026-11-03 — 예전에는 종료된 것까지 세었다) */
+      '<span class="tc">' + evs.filter(function (e) { return !evExpired(e); }).length + '</span></button>' +
       '<button class="tab' + (S.evTab === 'notices' ? ' on' : '') + '" data-evtab="notices">' + bellIcon() +
       esc(pick('공지사항', 'Announcements', '公告通知', 'お知らせ')) +
       '<span class="tc">' + allNotices().length + '</span></button></div></div>';
