@@ -2788,6 +2788,8 @@ html.rt-dragging,html.rt-dragging *{cursor:grabbing !important;user-select:none;
   font-weight:600;letter-spacing:.06em;color:#6b7c82;background:rgba(0,54,66,.07)}
 @media (max-width:640px){ .nend{padding:2px 7px;font-size:10px;line-height:1.6} }
 .nbody .nperiod{margin:0 0 10px;font-family:var(--font);font-size:12.5px;font-weight:600;color:var(--brand)}
+/* 공지사항 — 분류 세부 탭을 없애 검색창만 남음 (2026-11-04). PC 는 오른쪽에 */
+@media (min-width:880px){ .ntoolbar{justify-content:flex-end} }
 
 </style>
 </head>
@@ -4623,13 +4625,7 @@ window.IMG          = {"/src/assets/images/ama_healmar_cleanser.jpg":"data:image
             : L('공지사항 작성', 'New announcement', '新建公告', 'お知らせを作成')) +
       '</h3><span class="adminbadge">' + L('관리자', 'Admin', '管理员', '管理者') + '</span></div>' +
 
-      (isEv ? '' :
-        '<div class="field"><label>' + L('분류', 'Category', '分类', '分類') + '</label>' +
-        '<div class="cat3">' + NOTICE_CATS.filter(function (c) { return c.code !== 'All'; })
-          .map(function (c) {
-            return '<button data-bcat="' + esc(c.kr) + '" class="' + (f.category === c.kr ? 'on' : '') + '">' +
-              esc(L2(c)) + '</button>';
-          }).join('') + '</div></div>') +
+      /* 공지 글쓰기의 「분류」 선택은 없앴다 — 공지사항 단독 (2026-11-04). 새 공지는 「공지」로 저장 */
 
       '<div class="field"><label>' + L('제목', 'Title', '标题', 'タイトル') + '</label>' +
       '<input id="bf-title" value="' + esc(f.title || '') + '" placeholder="' +
@@ -4808,24 +4804,18 @@ window.IMG          = {"/src/assets/images/ama_healmar_cleanser.jpg":"data:image
 
   function allNotices() {
     var base = S.lang === 'KR' ? window.NOTICES : (window.NOTICES_TR[S.lang] || window.NOTICES);
-    /* 관리자가 올린 이벤트도 공지사항 「이벤트」 분류에 함께 보인다 (2026-11-03)
-       ⚠ 따로 저장하지 않고 이벤트에서 그때그때 만든다 — 이벤트를 고치거나 지우면 공지 쪽도 저절로 따라간다.
-          id 는 「evn-이벤트id」, fromEvent 에 원래 이벤트 id. 올린 순서(최신 먼저)로 공지와 섞는다. */
-    var evN = (S.board && S.board.events ? S.board.events : []).filter(function (e) { return e && e.id && e.html !== undefined; })
-      .map(function (e) {
-        return { id: 'evn-' + e.id, fromEvent: e.id, category: '이벤트', title: e.title,
-                 content: String(e.html || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim(),
-                 html: e.html, at: e.at, date: e.date, evRef: e };
-      });
-    var made = function (x) { var m = String((x && (x.fromEvent || x.id)) || '').match(/(\d{10,})/); return m ? +m[1] : 0; };
-    var mine = (S.board && S.board.notices ? S.board.notices : []).concat(evN)
+    /* 공지사항에는 관리자가 쓴 공지만 (2026-11-04, 사용자 요청)
+       ⚠ 2026-11-03 에는 이벤트도 「이벤트」 이름표로 함께 보였다 — 이제 이벤트는 「진행중인 이벤트」 탭에서만.
+          (목록의 evRef·fromEvent 처리 코드는 남아 있지만 쓰이지 않는다) */
+    var made = function (x) { var m = String((x && x.id) || '').match(/(\d{10,})/); return m ? +m[1] : 0; };
+    var mine = (S.board && S.board.notices ? S.board.notices : []).slice()
       .sort(function (a, b) { return made(b) - made(a); });
     return mine.concat(base);
   }
   function filteredNotices() {
     var q = S.noticeQ.trim().toLowerCase();
     var want = null;
-    NOTICE_CATS.forEach(function (c) { if (c.code === S.noticeCat && c.code !== 'All') want = c.kr; });
+    /* 분류 거르기는 없앴다 (2026-11-04 — 세부 탭 삭제). 검색만 */
     return allNotices().filter(function (n) {
       if (want && n.category !== want) return false;
       if (q && (n.title + ' ' + n.content).toLowerCase().indexOf(q) === -1) return false;
@@ -5020,10 +5010,8 @@ window.IMG          = {"/src/assets/images/ama_healmar_cleanser.jpg":"data:image
           '<button class="btn btn-solid btn-sq" data-newboard="notice">＋ ' +
           esc(pick('공지 작성', 'New announcement', '新建公告', 'お知らせを作成')) + '</button>' +
           '</div>' : '') +
-        '<div class="ntoolbar"><div class="ncats">' + NOTICE_CATS.map(function (c) {
-          return '<button class="ncat-btn' + (S.noticeCat === c.code ? ' on' : '') + '" data-ncat="' + c.code + '">' +
-            esc(L(c.l)) + '</button>';
-        }).join('') + '</div>' +
+        /* 분류 세부 탭(전체·공지·이벤트)은 없앴다 — 공지사항 하나의 목록 (2026-11-04, 사용자 요청) */
+        '<div class="ntoolbar">' +
         '<div style="width:100%;max-width:320px"><div class="sbox full">' +
         '<span class="mag">⌕</span><input id="notice-q" value="' + esc(S.noticeQ) + '" placeholder="' +
         esc(pick('공지 제목 또는 내용을 검색하세요...', 'Search announcement contents...', '请输入公告标题或内容进行检索...', 'お知らせのタイトルや本文を検索…')) + '"></div></div></div>' +
@@ -5084,10 +5072,11 @@ window.IMG          = {"/src/assets/images/ama_healmar_cleanser.jpg":"data:image
         }).join('') + '</div>'
           : '<div class="nempty"><span class="ic">◌</span>' +
           /* 아예 등록된 게 없을 때와 검색 결과가 없을 때를 구분해 안내한다 */
-          esc(allNotices().length === 0
-            ? (S.boardLoading ? pick('불러오는 중…', 'Loading…', '加载中…', '読み込み中…')
-              : pick('등록된 내용이 없습니다.', 'Nothing has been posted yet.', '尚无发布的内容。', '掲載されている内容はありません。'))
-            : pick('검색 결과에 부합하는 공지사항이 존재하지 않습니다.', 'No announcements found matching the search.', '未检索到符合条件的公告通知。', '検索条件に合うお知らせがありません。')) + '</div>') +
+          /* ⚠ 「검색 결과에 부합하는…」은 **검색어가 있을 때만** (2026-11-04 — 예전에는 분류 탭에 글이 없어도 떴다) */
+          esc(S.noticeQ.trim()
+            ? pick('검색 결과에 부합하는 공지사항이 존재하지 않습니다.', 'No announcements found matching the search.', '未检索到符合条件的公告通知。', '検索条件に合うお知らせがありません。')
+            : (S.boardLoading && allNotices().length === 0 ? pick('불러오는 중…', 'Loading…', '加载中…', '読み込み中…')
+              : pick('등록된 공지사항이 없습니다.', 'No announcements have been posted yet.', '暂无公告。', '掲載されているお知らせはありません。'))) + '</div>') +
         pager(S.noticePage, window.__nPages || 1, 'data-npage', true) +
         '</div>';
     }
