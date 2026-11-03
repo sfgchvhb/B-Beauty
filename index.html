@@ -4631,8 +4631,9 @@ window.IMG          = {"/src/assets/images/ama_healmar_cleanser.jpg":"data:image
       '<input id="bf-title" value="' + esc(f.title || '') + '" placeholder="' +
       L('제목을 입력하세요', 'Enter a title', '请输入标题', 'タイトルを入力') + '"></div>' +
 
-      (isEv ? '<div class="field"><label>' + L('한 줄 소개', 'Summary', '简介', '概要') + '</label>' +
-        '<input id="bf-desc" value="' + esc(f.desc || '') + '"></div>' +
+      /* 「한 줄 소개」 칸은 화면 어디에도 표시되지 않아 없앴다 (2026-11-03, 사용자 요청).
+         저장되는 desc 는 예전처럼 본문 앞 90자로 자동으로 채워진다(표시하는 곳 없음) */
+      (isEv ? '' +
         /* 이벤트 기간 — 시작일도 고를 수 있다 (2026-11-03. 예전에는 시작일이 늘 올린 날이었다) */
         /* 시각도 고를 수 있다 (2026-11-03) — 비워 두면 시작 0시 · 종료 23:59 */
         '<div class="field2 evdates">' +
